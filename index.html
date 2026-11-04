@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEALZOMF - Mutual Fund Distributor</title>
+    <style>
+        /* CSS reset & base */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; line-height: 1.6; }
+        
+        /* Colors */
+        :root { --primary-blue: #0a2540; --secondary-blue: #0070f3; --light-gray: #e6ebf1; --white: #ffffff; --accent: #ff6b6b; }
+        
+        /* Navigation */
+        header { background-color: var(--primary-blue); color: var(--white); padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.8rem; font-weight: bold; letter-spacing: 1px; color: var(--white); text-decoration: none; }
+        nav a { color: var(--white); text-decoration: none; margin-left: 20px; font-weight: 500; }
+        nav a:hover { color: var(--secondary-blue); }
+        
+        /* Hero Carousel Banner */
+        .hero-slider { position: relative; width: 100%; height: 400px; overflow: hidden; background-color: var(--primary-blue); }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.8s ease-in-out; display: flex; align-items: center; justify-content: center; text-align: center; color: white; padding: 20px; }
+        .slide.active { opacity: 1; z-index: 1; }
+        .slide-content h1 { font-size: 3rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .slide-content p { font-size: 1.2rem; margin-bottom: 20px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+        .slide-btn { padding: 12px 30px; background-color: var(--accent); color: white; border: none; border-radius: 25px; font-size: 1.1rem; cursor: pointer; text-decoration: none; font-weight: bold; transition: background 0.3s; }
+        .slide-btn:hover { background-color: #ff4757; }
+        
+        /* Slide Backgrounds */
+        .bg-1 { background: linear-gradient(135deg, #0a2540 0%, #0070f3 100%); }
+        .bg-2 { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+        .bg-3 { background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); }
+        
+        /* Slider Controls */
+        .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; font-size: 2rem; padding: 10px 15px; cursor: pointer; z-index: 10; border-radius: 5px; }
+        .slider-arrow:hover { background: rgba(0,0,0,0.8); }
+        .prev { left: 20px; }
+        .next { right: 20px; }
+        
+        /* Main Sections */
+        section { padding: 60px 5%; max-width: 1200px; margin: auto; }
+        .section-title { text-align: center; font-size: 2.2rem; color: var(--primary-blue); margin-bottom: 40px; }
+        
+        /* About / Advisor Section */
+        .advisor-card { background: var(--white); border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; overflow: hidden; margin-bottom: 40px; border-bottom: 5px solid var(--primary-blue); }
+        .advisor-image { flex: 1; min-width: 300px; background: linear-gradient(to bottom right, #e6ebf1, #ffffff); display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .advisor-photo { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border: 3px solid var(--primary-blue); }
+        .advisor-info { flex: 2; padding: 40px; min-width: 300px; }
+        .advisor-info h2 { color: var(--primary-blue); margin-bottom: 10px; font-size: 2rem; }
+        .arn-badge { display: inline-block; background-color: var(--light-gray); color: var(--primary-blue); padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-bottom: 20px; border: 1px solid #ccc; }
+        
+        /* Services */
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .service-box { background: var(--white); padding: 30px; border-radius: 8px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: transform 0.3s; border-top: 4px solid var(--secondary-blue); }
+        .service-box:hover { transform: translateY(-5px); }
+        .service-box h3 { color: var(--primary-blue); margin-bottom: 15px; }
+        
+        /* Client Portal */
+        .login-portal { background: var(--white); padding: 40px; border-radius: 10px; text-align: center; margin: 40px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .login-btn { display: inline-block; background: var(--primary-blue); color: white; padding: 12px 30px; margin: 10px; text-decoration: none; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        .login-btn:hover { background: var(--secondary-blue); }
+        
+        /* Calculators */
+        .calc-container { background: var(--white); padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 800px; margin: auto; }
+        .calc-tabs { display: flex; justify-content: center; margin-bottom: 20px; border-bottom: 2px solid var(--light-gray); }
+        .tab-btn { background: none; border: none; padding: 10px 20px; font-size: 1.1rem; cursor: pointer; color: #666; font-weight: bold; }
+        .tab-btn.active { color: var(--secondary-blue); border-bottom: 3px solid var(--secondary-blue); }
+        
+        .calc-form { display: grid; gap: 15px; }
+        .input-group { display: flex; flex-direction: column; text-align: left; }
+        .input-group label { margin-bottom: 5px; font-weight: bold; color: var(--primary-blue); }
+        .input-group input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
+        .calc-result { margin-top: 20px; padding: 20px; background: var(--light-gray); border-radius: 5px; text-align: center; }
+        .calc-result h3 { color: var(--primary-blue); font-size: 1.8rem; }
+        
+        /* Contact Form */
+        .contact-section { display: flex; flex-wrap: wrap; gap: 40px; background: var(--white); padding: 40px; border-radius: 10px; }
+        .contact-info { flex: 1; min-width: 300px; }
+        .contact-form { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; }
+        .contact-form input, .contact-form textarea { padding: 12px; border: 1px solid #ccc; border-radius: 5px; }
+        .contact-form button { background: var(--primary-blue); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
+        /* Footer */
+        footer { background: var(--primary-blue); color: #ccc; text-align: center; padding: 30px 20px; margin-top: 40px; font-size: 0.9rem; }
+        .disclaimer { border: 1px solid #555; padding: 15px; margin: 20px auto; max-width: 800px; font-size: 0.8rem; text-align: left; }
+        
+        /* WhatsApp Floating Icon */
+        .whatsapp-float { position: fixed; bottom: 30px; right: 30px; background-color: #25d366; color: white; border-radius: 50px; padding: 15px 25px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; display: flex; align-items: center; gap: 10px; }
+        .whatsapp-float:hover { background-color: #128c7e; }
+        
+        /* Responsive */
+        @media(max-width: 768px) {
+            header { flex-direction: column; gap: 15px; }
+            .slide-content h1 { font-size: 2rem; }
+            .advisor-card { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <a href="#" class="logo">WEALZOMF</a>
+        <nav>
+            <a href="#about">About</a>
+            <a href="#services">Services</a>
+            <a href="#calculator">Calculators</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <!-- Auto Sliding Banner -->
+    <div class="hero-slider">
+        <button class="slider-arrow prev" onclick="changeSlide(-1)">&#10094;</button>
+        <button class="slider-arrow next" onclick="changeSlide(1)">&#10095;</button>
+        
+        <div class="slide bg-1 active">
+            <div class="slide-content">
+                <h1>#MissionWealth</h1>
+                <p>Start your wealth creation journey with SIPs starting just ₹500/month.</p>
+                <a href="#calculator" class="slide-btn">Calculate SIP Now</a>
+            </div>
+        </div>
+        
+        <div class="slide bg-2">
+            <div class="slide-content">
+                <h1>Save Tax Smartly</h1>
+                <p>Invest in ELSS Mutual Funds and save up to ₹46,800 in taxes under Section 80C.</p>
+                <a href="#contact" class="slide-btn">Start ELSS Today</a>
+            </div>
+        </div>
+        
+        <div class="slide bg-3">
+            <div class="slide-content">
+                <h1>Plan Your Retirement</h1>
+                <p>Build a 1 Crore+ corpus with disciplined investing. Secure your family's future.</p>
+                <a href="#contact" class="slide-btn">Book Consultation</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Advisor -->
+    <section id="about">
+        <h2 class="section-title">Meet Your Advisor</h2>
+        <div class="advisor-card">
+            <div class="advisor-image">
+                <!-- IMPORTANT: Make sure rohit-sir.png is in the same folder -->
+                <img src="rohit-sir.png" alt="Rohit Singh - Advisor" class="advisor-photo">
+            </div>
+            <div class="advisor-info">
+                <h2>Rohit Singh</h2>
+                <div class="arn-badge">AMFI Registered Mutual Fund Distributor | ARN-342662</div>
+                <p>Hello! I am Rohit Singh, your trusted financial partner at WEALZOMF. With a deep understanding of market dynamics and a commitment to your financial well-being, I help individuals and families create long-term wealth.</p>
+                <br>
+                <p>Whether you want to start your first SIP, save taxes, or plan for your child's education and your retirement, I provide personalized investment strategies tailored to your unique goals.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Client Login Portal -->
+    <section>
+        <div class="login-portal">
+            <h2 style="color: var(--primary-blue); margin-bottom: 20px;">Client Login Portal</h2>
+            <p style="margin-bottom: 20px;">Existing investors can track their portfolio and transact online here.</p>
+            <a href="#" class="login-btn">WEALZOMF Login</a>
+            <a href="#" class="login-btn">BSE StAR MF Login</a>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section id="services">
+        <h2 class="section-title">Comprehensive Financial Services</h2>
+        <div class="services-grid">
+            <div class="service-box">
+                <h3>Mutual Funds</h3>
+                <p>Expert guidance on SIPs, Lumpsum investments, and ELSS Tax Saving Funds tailored to your risk profile.</p>
+            </div>
+            <div class="service-box">
+                <h3>Life Insurance (LIC)</h3>
+                <p>Secure your family's future with trusted term plans and life insurance policies from LIC.</p>
+            </div>
+            <div class="service-box">
+                <h3>Health & Motor (Tata AIG)</h3>
+                <p>Comprehensive health coverage and motor insurance through Tata AIG to protect you against unforeseen expenses.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calculators -->
+    <section id="calculator">
+        <h2 class="section-title">Financial Calculators</h2>
+        <div class="calc-container">
+            <div class="calc-tabs">
+                <button class="tab-btn active" onclick="switchTab('sip')">SIP Calculator</button>
+                <button class="tab-btn" onclick="switchTab('lumpsum')">Lumpsum Calculator</button>
+            </div>
+            
+            <div id="sip-form" class="calc-form">
+                <div class="input-group">
+                    <label>Monthly Investment (₹)</label>
+                    <input type="number" id="sipAmount" value="5000">
+                </div>
+                <div class="input-group">
+                    <label>Expected Return Rate (p.a %)</label>
+                    <input type="number" id="sipRate" value="12">
+                </div>
+                <div class="input-group">
+                    <label>Time Period (Years)</label>
+                    <input type="number" id="sipYears" value="10">
+                </div>
+                <button class="slide-btn" onclick="calculateSIP()" style="margin-top: 10px;">Calculate SIP</button>
+            </div>
+            
+            <div id="lumpsum-form" class="calc-form" style="display: none;">
+                <div class="input-group">
+                    <label>Total Investment (₹)</label>
+                    <input type="number" id="lumAmount" value="100000">
+                </div>
+                <div class="input-group">
+                    <label>Expected Return Rate (p.a %)</label>
+                    <input type="number" id="lumRate" value="12">
+                </div>
+                <div class="input-group">
+                    <label>Time Period (Years)</label>
+                    <input type="number" id="lumYears" value="10">
+                </div>
+                <button class="slide-btn" onclick="calculateLumpsum()" style="margin-top: 10px;">Calculate Lumpsum</button>
+            </div>
+
+            <div class="calc-result" id="result-box">
+                <p>Total Value will be approx:</p>
+                <h3 id="finalValue">₹ 11,61,695</h3>
+                <p style="font-size: 0.9rem; margin-top: 10px; color: #666;">(Invested: <span id="investedAmount">₹ 6,00,000</span> | Wealth Gained: <span id="wealthGained">₹ 5,61,695</span>)</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+        <h2 class="section-title">Get In Touch</h2>
+        <div class="contact-section">
+            <div class="contact-info">
+                <h3>Contact Details</h3>
+                <p style="margin-top: 15px;"><strong>Advisor:</strong> Rohit Singh</p>
+                <p><strong>Brand:</strong> WEALZOMF</p>
+                <p><strong>Phone / WhatsApp:</strong> +91 7079946867</p>
+                <p><strong>Email:</strong> wealzomfd@gmail.com</p>
+                <br>
+                <p>Let's plan your financial journey today. Drop a message or call to book a free consultation.</p>
+            </div>
+            <div class="contact-form">
+                <input type="text" placeholder="Your Name" required>
+                <input type="tel" placeholder="Your Mobile Number" required>
+                <textarea rows="4" placeholder="How can we help you? (e.g. Want to start SIP)" required></textarea>
+                <button type="submit">Submit Details</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer & Disclaimer -->
+    <footer>
+        <p>&copy; 2026 WEALZOMF - Rohit Singh. All Rights Reserved.</p>
+        <div class="disclaimer">
+            <strong>Mandatory Disclaimer:</strong> Mutual Fund investments are subject to market risks, read all scheme related documents carefully. The calculators provided on this website are for illustrative purposes only and do not represent actual returns. Past performance is not an indicator of future returns. 
+            <br><br>
+            AMFI Registered Mutual Fund Distributor ARN-342662.
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/917079946867?text=Hello%20Rohit%20Sir,%20I%20want%20to%20know%20more%20about%20Mutual%20Funds." class="whatsapp-float" target="_blank">
+        💬 Chat on WhatsApp
+    </a>
+
+    <!-- JavaScript for Slider & Calculators -->
+    <script>
+        // Banner Slider Logic
+        let slideIndex = 0;
+        const slides = document.querySelectorAll(".slide");
+        
+        function showSlides() {
+            slides.forEach(slide => slide.classList.remove("active"));
+            slideIndex++;
+            if (slideIndex > slides.length) {slideIndex = 1}
+            slides[slideIndex-1].classList.add("active");
+            setTimeout(showSlides, 5000); // Change image every 5 seconds
+        }
+        
+        function changeSlide(n) {
+            slideIndex += n - 1;
+            if(slideIndex < 0) { slideIndex = slides.length - 1; }
+            slides.forEach(slide => slide.classList.remove("active"));
+            if (slideIndex >= slides.length) {slideIndex = 0}
+            slides[slideIndex].classList.add("active");
+        }
+        
+        // Start auto slider
+        setTimeout(showSlides, 5000);
+
+        // Calculator Tabs Logic
+        function switchTab(type) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('sip-form').style.display = 'none';
+            document.getElementById('lumpsum-form').style.display = 'none';
+            
+            if(type === 'sip') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('sip-form').style.display = 'grid';
+                calculateSIP();
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('lumpsum-form').style.display = 'grid';
+                calculateLumpsum();
+            }
+        }
+
+        // Calculator Math Logic
+        function formatRupee(number) {
+            return new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(number);
+        }
+
+        function calculateSIP() {
+            let P = parseFloat(document.getElementById('sipAmount').value);
+            let annualRate = parseFloat(document.getElementById('sipRate').value);
+            let years = parseFloat(document.getElementById('sipYears').value);
+            
+            if(isNaN(P) || isNaN(annualRate) || isNaN(years)) return;
+
+            let i = (annualRate / 100) / 12; // monthly rate
+            let n = years * 12; // total months
+            
+            // SIP Formula: M = P × ({[1 + i]^n - 1} / i) × (1 + i)
+            let M = P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
+            let invested = P * n;
+            let gained = M - invested;
+
+            document.getElementById('finalValue').innerText = '₹ ' + formatRupee(M);
+            document.getElementById('investedAmount').innerText = '₹ ' + formatRupee(invested);
+            document.getElementById('wealthGained').innerText = '₹ ' + formatRupee(gained);
+        }
+
+        function calculateLumpsum() {
+            let P = parseFloat(document.getElementById('lumAmount').value);
+            let annualRate = parseFloat(document.getElementById('lumRate').value);
+            let years = parseFloat(document.getElementById('lumYears').value);
+            
+            if(isNaN(P) || isNaN(annualRate) || isNaN(years)) return;
+
+            // Compound Interest Formula: A = P(1 + r/100)^n
+            let A = P * Math.pow((1 + (annualRate/100)), years);
+            let gained = A - P;
+
+            document.getElementById('finalValue').innerText = '₹ ' + formatRupee(A);
+            document.getElementById('investedAmount').innerText = '₹ ' + formatRupee(P);
+            document.getElementById('wealthGained').innerText = '₹ ' + formatRupee(gained);
+        }
+    </script>
+</body>
+</html>
