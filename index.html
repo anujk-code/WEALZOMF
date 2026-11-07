@@ -159,14 +159,16 @@
     </section>
 
     <!-- Client Login Portal -->
-    <section>
-        <div class="login-portal">
-            <h2 style="color: var(--primary-blue); margin-bottom: 20px;">Client Login Portal</h2>
-            <p style="margin-bottom: 20px;">Existing investors can track their portfolio and transact online here.</p>
-            <a href="#" class="login-btn">WEALZOMF Login</a>
-            <a href="#" class="login-btn">BSE StAR MF Login</a>
-        </div>
-    </section>
+<section class="login-portal" style="padding: 40px; text-align: center; background-color: #f9f9f9;">
+    <div class="box" style="background: white; padding: 30px; display: inline-block; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1);">
+        <h2 style="color: var(--primary-blue); margin-bottom: 20px;">WEALZOMF Client Login</h2>
+        <div><input type="text" id="panInput" placeholder="Enter PAN Number" style="margin: 10px; padding: 10px; width: 250px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px;"></div>
+        <div><input type="text" id="folioInput" placeholder="Enter Folio Number" style="margin: 10px; padding: 10px; width: 250px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px;"></div>
+        <br>
+        <button id="loginBtn" style="padding: 10px 30px; font-size: 16px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 5px; margin-top: 10px;">Login</button>
+        <p id="message" style="margin-top: 20px; font-weight: bold; font-size: 16px;"></p>
+    </div>
+</section>
 
     <!-- Comprehensive Financial Services Section -->
 <section class="financial-services-section" style="padding: 60px 40px; background-color: #f8fafc; font-family: Arial, sans-serif;">
@@ -402,6 +404,91 @@
             document.getElementById('investedAmount').innerText = '₹ ' + formatRupee(P);
             document.getElementById('wealthGained').innerText = '₹ ' + formatRupee(gained);
         }
+        </script>
+        <!-- Firebase & Login Logic Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMcDGkSVzbM4HYZyzPl_yfG8EBeDgh-UQ",
+            authDomain: "wealzomf-a1c10.firebaseapp.com",
+            projectId: "wealzomf-a1c10",
+            storageBucket: "wealzomf-a1c10.firebasestorage.app",
+            messagingSenderId: "361957885601",
+            appId: "1:361957885601:web:e933ec16b708cd94d812e0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.addEventListener("DOMContentLoaded", () => {
+            const loginBtn = document.getElementById("loginBtn");
+
+            if (loginBtn) {
+                loginBtn.addEventListener("click", async () => {
+                    const pan = document.getElementById("panInput").value.trim().toUpperCase();
+                    const folio = document.getElementById("folioInput").value.trim();
+                    const messageEl = document.getElementById("message");
+
+                    if (!pan || !folio) {
+                        messageEl.innerText = "Please enter both PAN and Folio Number!";
+                        messageEl.style.color = "orange";
+                        return;
+                    }
+
+                    messageEl.innerText = "Connecting to database...";
+                    messageEl.style.color = "blue";
+
+                    try {
+                        const querySnapshot = await getDocs(collection(db, "client"));
+                        let loginSuccess = false;
+                        let loggedInName = "";
+                        let loggedInFolio = "";
+
+                        querySnapshot.forEach((doc) => {
+                            let data = doc.data();
+                            
+                            // Database ki value ko bhi capital mein check karega taaki mismatch na ho
+                            let dbPan = String(data.pan || "").trim().toUpperCase();
+                            let dbFolio = String(data.folio || "").trim();
+                            
+                            if (dbPan === pan && dbFolio === folio) {
+                                loginSuccess = true;
+                                loggedInName = data.name;
+                                loggedInFolio = data.folio;
+                                window.loggedInClient = data;
+                            }
+                        });
+
+                        if (loginSuccess) {
+                            localStorage.setItem("clientName", loggedInName);
+                            localStorage.setItem("clientPan", pan);
+                            localStorage.setItem("clientFolio", loggedInFolio);
+                            
+                            localStorage.setItem("clientScheme", window.loggedInClient.scheme || "-");
+                            localStorage.setItem("clientUnits", window.loggedInClient.units || 0);
+                            localStorage.setItem("clientInvestment", window.loggedInClient.investment || 0);
+                            localStorage.setItem("clientCurrentValue", window.loggedInClient.currentValue || 0);
+                            localStorage.setItem("clientProfitLoss", window.loggedInClient.profitLoss || 0);
+
+                            messageEl.innerText = "Login Successful! Redirecting...";
+                            messageEl.style.color = "green";
+                            
+                            setTimeout(() => {
+                                window.location.href = "dashboard.html";
+                            }, 1000);
+                        } else {
+                            messageEl.innerText = "Wrong PAN or Folio number!";
+                            messageEl.style.color = "red";
+                        }
+                    } catch (error) {
+                        messageEl.innerText = "Database Error: " + error.message;
+                        messageEl.style.color = "red";
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

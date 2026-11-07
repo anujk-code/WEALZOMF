@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEALZOMF - Client Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
+        header { background-color: #003366; color: white; padding: 20px; text-align: center; position: relative; }
+        .logout-btn { position: absolute; right: 20px; top: 25px; background: #ff4d4d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .logout-btn:hover { background: #cc0000; }
+        .container { max-width: 850px; margin: 40px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #003366; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
+        
+        /* Grid Layout for Portfolio Details */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; }
+        .info-box { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 5px solid #003366; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .info-box span { display: block; font-size: 14px; color: #666; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .info-box strong { font-size: 20px; color: #333; }
+        
+        /* Profit and Loss Colors */
+        .profit-text { color: #28a745 !important; font-weight: bold; }
+        .loss-text { color: #dc3545 !important; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>WEALZOMF Financial Services</h1>
+        <p>Client Portfolio Dashboard</p>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+    </header>
+
+    <div class="container">
+        <h2 id="welcomeMessage">Welcome, Investor</h2>
+        
+        <div class="info-grid">
+            <div class="info-box">
+                <span>PAN Number</span>
+                <strong id="displayPan">-</strong>
+            </div>
+            <div class="info-box">
+                <span>Folio Number</span>
+                <strong id="displayFolio">-</strong>
+            </div>
+            <div class="info-box" style="grid-column: span 2;">
+                <span>Mutual Fund Scheme Name</span>
+                <strong id="displayScheme">-</strong>
+            </div>
+            <div class="info-box">
+                <span>Total Units</span>
+                <strong id="displayUnits">-</strong>
+            </div>
+            <div class="info-box">
+                <span>Purchase Value (Invested)</span>
+                <strong>₹ <span id="displayInvestment">0</span></strong>
+            </div>
+            <div class="info-box">
+                <span>Current Value</span>
+                <strong>₹ <span id="displayCurrentValue">0</span></strong>
+            </div>
+            <div class="info-box" style="border-left: 5px solid #ff9900;">
+                <span>Total Profit / Loss</span>
+                <strong style="font-size: 24px;">₹ <span id="displayProfitLoss">0</span></strong>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            // 1. Check if user is logged in (Agar Folio nahi mila, toh wapas Login page par bhej do)
+            const folio = localStorage.getItem("clientFolio");
+            if (!folio) {
+                window.location.href = "index.html"; 
+                return;
+            }
+
+            // 2. Get all data from LocalStorage (Jo humne login page se save kiya tha)
+            const name = localStorage.getItem("clientName") || "Investor";
+            const pan = localStorage.getItem("clientPan") || "-";
+            const scheme = localStorage.getItem("clientScheme") || "-";
+            const units = localStorage.getItem("clientUnits") || "0";
+            const investment = localStorage.getItem("clientInvestment") || "0";
+            const currentValue = localStorage.getItem("clientCurrentValue") || "0";
+            const profitLoss = localStorage.getItem("clientProfitLoss") || "0";
+
+            // Indian Rupee Format function (eg: 150000 ko 1,50,000 banane ke liye)
+            const formatRs = (num) => new Intl.NumberFormat('en-IN').format(Number(num));
+
+            // 3. HTML IDs mein Data dalna
+            document.getElementById("welcomeMessage").innerText = "Welcome, " + name;
+            document.getElementById("displayPan").innerText = pan;
+            document.getElementById("displayFolio").innerText = folio;
+            document.getElementById("displayScheme").innerText = scheme;
+            document.getElementById("displayUnits").innerText = units;
+            
+            document.getElementById("displayInvestment").innerText = formatRs(investment);
+            document.getElementById("displayCurrentValue").innerText = formatRs(currentValue);
+            
+            // 4. Profit / Loss ko set karna aur Color change karna
+            const plElement = document.getElementById("displayProfitLoss");
+            plElement.innerText = formatRs(profitLoss);
+            
+            if (Number(profitLoss) >= 0) {
+                plElement.classList.add("profit-text"); // Plus mein hai toh Hara (Green)
+            } else {
+                plElement.classList.add("loss-text");   // Minus mein hai toh Laal (Red)
+            }
+
+            // 5. Logout Button Logic (Data clear karke wapas login screen par bhejna)
+            document.getElementById("logoutBtn").addEventListener("click", () => {
+                localStorage.clear();
+                window.location.href = "index.html";
+            });
+        });
+    </script>
+</body>
+</html>

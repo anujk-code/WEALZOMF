@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEALZOMF - Admin Panel</title>
+    <!-- SheetJS Library Excel file read karne ke liye -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
+        header { background-color: #003366; color: white; padding: 20px; text-align: center; }
+        .container { max-width: 650px; margin: 30px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        h2 { color: #003366; text-align: center; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        input { width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .save-btn { background-color: #28a745; color: white; border: none; padding: 12px; font-size: 16px; width: 100%; cursor: pointer; border-radius: 5px; font-weight: bold; margin-top: 10px; }
+        .save-btn:hover { background-color: #218838; }
+        .excel-box { background: #eef2f7; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 2px dashed #003366; }
+        #message { text-align: center; margin-top: 15px; font-weight: bold; font-size: 16px; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #003366; text-decoration: none; font-weight: bold; }
+        hr { margin: 25px 0; border: 0; border-top: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>WEALZOMF Financial Services</h1>
+        <p>Admin Management Panel - Bulk & Manual Entry</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- 📁 Bulk Upload Section (Excel / CSV) -->
+        <div class="excel-box">
+            <h3>📁 Bulk Upload via Excel (.xlsx / .csv)</h3>
+            <p style="font-size: 14px; color: #555;">Excel columns format: <br><b>name, pan, folio, scheme, units, investment, currentValue, profitLoss</b></p>
+            <input type="file" id="excelFile" accept=".xlsx, .csv" style="margin-top: 10px;">
+            <button class="save-btn" id="uploadExcelBtn" style="background-color: #003366; margin-top: 10px;">Upload & Auto-Save All to Database</button>
+        </div>
+
+        <hr>
+
+        <h2>Or Add Single Client Manually</h2>
+        
+        <div class="form-group">
+            <label>Investor Name:</label>
+            <input type="text" id="clientName" placeholder="Enter investor name">
+        </div>
+
+        <div class="form-group">
+            <label>PAN Number:</label>
+            <input type="text" id="clientPan" placeholder="Enter PAN number (e.g. ABCDE1234F)" style="text-transform: uppercase;">
+        </div>
+
+        <div class="form-group">
+            <label>Folio Number:</label>
+            <input type="text" id="clientFolio" placeholder="Enter Folio number">
+        </div>
+
+        <div class="form-group">
+            <label>Scheme Name:</label>
+            <input type="text" id="clientScheme" placeholder="Enter Scheme name">
+        </div>
+
+        <div class="form-group">
+            <label>Total Units:</label>
+            <input type="number" step="any" id="clientUnits" placeholder="Enter Total Units">
+        </div>
+
+        <div class="form-group">
+            <label>Purchase Value (₹):</label>
+            <input type="number" id="clientInvestment" placeholder="Enter Purchase Value">
+        </div>
+
+        <div class="form-group">
+            <label>Current Value (₹):</label>
+            <input type="number" id="clientCurrentValue" placeholder="Enter Current Value">
+        </div>
+
+        <div class="form-group">
+            <label>Profit / Loss (₹):</label>
+            <input type="number" id="clientProfitLoss" placeholder="Enter profit (+ve) or loss (-ve)">
+        </div>
+
+        <button class="save-btn" id="saveClientBtn">Auto-Save Client to Database</button>
+        <p id="message"></p>
+
+        <a href="index.html" class="back-link">&larr; Back to Login Page</a>
+    </div>
+
+    <!-- Firebase & Excel Auto-Save Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMcDGkSVzbM4HYZyzPl_yfG8EBeDgh-UQ",
+            authDomain: "wealzomf-a1c10.firebaseapp.com",
+            projectId: "wealzomf-a1c10",
+            storageBucket: "wealzomf-a1c10.firebasestorage.app",
+            messagingSenderId: "361957885601",
+            appId: "1:361957885601:web:e933ec16b708cd94d812e0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const messageEl = document.getElementById("message");
+
+        // 1. Manual Entry Auto-Save Logic
+        document.getElementById("saveClientBtn").addEventListener("click", async () => {
+            const name = document.getElementById("clientName").value.trim();
+            const pan = document.getElementById("clientPan").value.trim().toUpperCase();
+            const folio = document.getElementById("clientFolio").value.trim();
+            const scheme = document.getElementById("clientScheme").value.trim();
+            const units = document.getElementById("clientUnits").value.trim();
+            const investment = document.getElementById("clientInvestment").value.trim();
+            const currentValue = document.getElementById("clientCurrentValue").value.trim();
+            const profitLoss = document.getElementById("clientProfitLoss").value.trim();
+
+            if (!name || !pan || !folio || !scheme || !units || !investment || !currentValue || !profitLoss) {
+                messageEl.innerText = "Please fill all the fields!";
+                messageEl.style.color = "orange";
+                return;
+            }
+
+            messageEl.innerText = "Auto-saving client data to database...";
+            messageEl.style.color = "blue";
+
+            try {
+                await addDoc(collection(db, "client"), {
+                    name: name,
+                    pan: pan,
+                    folio: folio,
+                    scheme: scheme,
+                    units: Number(units),
+                    investment: Number(investment),
+                    currentValue: Number(currentValue),
+                    profitLoss: Number(profitLoss),
+                    status: "Active"
+                });
+
+                messageEl.innerText = "Client data auto-saved successfully!";
+                messageEl.style.color = "green";
+
+                // Clear input fields
+                document.getElementById("clientName").value = "";
+                document.getElementById("clientPan").value = "";
+                document.getElementById("clientFolio").value = "";
+                document.getElementById("clientScheme").value = "";
+                document.getElementById("clientUnits").value = "";
+                document.getElementById("clientInvestment").value = "";
+                document.getElementById("clientCurrentValue").value = "";
+                document.getElementById("clientProfitLoss").value = "";
+
+            } catch (error) {
+                messageEl.innerText = "Error: " + error.message;
+                messageEl.style.color = "red";
+            }
+        });
+
+        // 2. Excel Bulk Upload & Auto-Save Logic
+        document.getElementById("uploadExcelBtn").addEventListener("click", () => {
+            const fileInput = document.getElementById("excelFile");
+            if (fileInput.files.length === 0) {
+                messageEl.innerText = "Please select an Excel or CSV file first!";
+                messageEl.style.color = "orange";
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                try {
+                    messageEl.innerText = "Processing and auto-saving Excel data...";
+                    messageEl.style.color = "blue";
+
+                    // Excel file ko read karna
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    
+                    const excelData = XLSX.utils.sheet_to_json(worksheet);
+
+                    let savedCount = 0;
+                    
+                    // NAYA LOOP: Excel ke columns ko Database fields se map karna
+                    for (let i = 0; i < excelData.length; i++) {
+                        let row = excelData[i];
+                        
+                        const clientData = {
+                            // Excel wale headers exact match karne chahiye (space aur brackets ke sath)
+                            name: row["Investor Name"] ? String(row["Investor Name"]).trim() : "",
+                            pan: row["PAN Number"] ? String(row["PAN Number"]).trim().toUpperCase() : "",
+                            folio: row["Folio Number"] ? String(row["Folio Number"]).trim() : "",
+                            scheme: row["Scheme Name"] ? String(row["Scheme Name"]).trim() : "-",
+                            units: row["Total Units"] ? String(row["Total Units"]).trim() : "0",
+                            
+                            // Symbols (₹, comma, plus) hatana taaki sirf numbers save hon
+                            investment: row["Purchase Value (₹)"] ? String(row["Purchase Value (₹)"]).replace(/[₹, ]/g, "") : "0",
+                            currentValue: row["Current Value (₹)"] ? String(row["Current Value (₹)"]).replace(/[₹, ]/g, "") : "0",
+                            profitLoss: row["Profit / Loss (₹)"] ? String(row["Profit / Loss (₹)"]).replace(/[₹, +]/g, "") : "0"
+                        };
+
+                        // Agar PAN aur Folio dono hain tabhi database mein add karega
+                        if (clientData.pan && clientData.folio) {
+                            await addDoc(collection(db, "client"), clientData);
+                            savedCount++;
+                        }
+                    }
+
+                    messageEl.innerText = "Success! " + savedCount + " clients automatically saved to Database.";
+                    messageEl.style.color = "green";
+
+                } catch (error) {
+                    console.error("Excel Error:", error);
+                    messageEl.innerText = "Error: " + error.message;
+                    messageEl.style.color = "red";
+                }
+            };
+            
+            // Ye line reader.onload function ko chalati hai
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
