@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEALZOMF - Advanced Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Dark Theme Design */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; 
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .calculator-container {
+            background-color: #1e293b;
+            width: 100%;
+            max-width: 950px;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* LOGO DESIGN */
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .brand-logo svg { width: 28px; height: 28px; }
+        .text-wealzo { color: #f8fafc; }
+        .text-mf { color: #34d399; }
+        
+        .calc-header h2 { margin: 0 0 20px 0; font-size: 24px; color: #fff; }
+        
+        /* Tabs Design */
+        .tabs { 
+            display: flex; 
+            gap: 0; 
+            margin-bottom: 30px; 
+            background: #0f172a;
+            border-radius: 8px;
+            overflow: hidden;
+            width: fit-content;
+        }
+        .tab-btn { 
+            background: transparent; 
+            border: 1px solid #334155; 
+            color: #94a3b8; 
+            padding: 12px 40px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            font-family: inherit; 
+            font-weight: 600; 
+            transition: 0.3s;
+        }
+        .tab-btn.active { background-color: #3b82f6; color: #fff; border-color: #3b82f6; }
+        
+        .calc-body { display: flex; flex-wrap: wrap; gap: 30px; }
+        .input-section { flex: 1; min-width: 320px; }
+        .result-section { 
+            flex: 1; 
+            min-width: 320px; 
+            background-color: #243447;
+            padding: 30px; 
+            border-radius: 12px; 
+            text-align: center; 
+        }
+
+        .input-group { margin-bottom: 25px; }
+        .input-group label { display: block; font-size: 14px; color: #e2e8f0; margin-bottom: 8px; text-align: left;}
+        
+        .input-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background-color: #334155; 
+            padding: 10px 15px; 
+            border-radius: 6px; 
+            margin-bottom: 15px; 
+        }
+        .input-row input[type="number"] { 
+            background: none; border: none; color: #fff; font-size: 16px; width: 100%; outline: none; 
+        }
+        input[type="range"] { 
+            width: 100%; accent-color: #3b82f6; height: 6px; background: #475569; border-radius: 5px; outline: none; cursor: pointer; 
+        }
+        
+        .result-section p { color: #94a3b8; margin-bottom: 10px; font-size: 15px;}
+        .result-section h3 { font-size: 36px; margin: 0 0 30px 0; color: #34d399; }
+        
+        .chart-container { width: 220px; margin: 0 auto; position: relative; }
+        
+        /* 3 VALUES HORIZONTAL DESIGN */
+        .breakdown-horizontal { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-top: 40px; 
+            text-align: center; 
+            font-size: 12px; 
+            color: #cbd5e1;
+        }
+        .breakdown-item { flex: 1; }
+        .breakdown-item strong { 
+            display: block; 
+            font-size: 15px; 
+            margin-top: 6px; 
+            color: #fff;
+        }
+        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .dot.invested { background-color: #3b82f6; } 
+        .dot.gained { background-color: #34d399; } 
+        .dot.total { background-color: #8b5cf6; } 
+        
+        @media (max-width: 768px) { 
+            .calc-body { flex-direction: column; } 
+            .calculator-container { padding: 20px; margin: 10px; } 
+            .breakdown-horizontal { flex-direction: column; gap: 15px;}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator-container">
+        
+        <!-- Logo -->
+        <div class="brand-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3v18h18"/>
+                <path d="M18 9l-5 5-4-4-5 5"/>
+                <circle cx="18" cy="9" r="2" fill="#34d399" stroke="none"/>
+                <circle cx="13" cy="14" r="2" fill="#34d399" stroke="none"/>
+                <circle cx="9" cy="10" r="2" fill="#34d399" stroke="none"/>
+            </svg>
+            <span class="text-wealzo">WEALZO</span><span class="text-mf">MF</span>
+        </div>
+
+        <div class="calc-header">
+            <h2>Advanced SIP & Lumpsum Calculator</h2>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" id="tabSIP">SIP</button>
+            <button class="tab-btn" id="tabLump">Lumpsum</button>
+        </div>
+
+        <div class="calc-body">
+            <!-- Left Side: Inputs -->
+            <div class="input-section">
+                
+                <div id="sipInputs">
+                    <div class="input-group">
+                        <label>Monthly Investment (₹)</label>
+                        <div class="input-row"><input type="number" id="sipAmount" value="5000"></div>
+                        <input type="range" id="sipRange" min="500" max="100000" step="500" value="5000">
+                    </div>
+                </div>
+
+                <div id="lumpInputs" style="display: none;">
+                    <div class="input-group">
+                        <label>Total Investment (₹)</label>
+                        <div class="input-row"><input type="number" id="lumpAmount" value="100000"></div>
+                        <input type="range" id="lumpRange" min="5000" max="5000000" step="5000" value="100000">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Expected Return Rate (p.a %)</label>
+                    <div class="input-row"><input type="number" id="rate" value="12"></div>
+                    <input type="range" id="rateRange" min="1" max="30" step="0.5" value="12">
+                </div>
+
+                <div class="input-group">
+                    <label>Time Period (Years)</label>
+                    <div class="input-row"><input type="number" id="time" value="10"></div>
+                    <input type="range" id="timeRange" min="1" max="40" step="1" value="10">
+                </div>
+            </div>
+
+            <!-- Right Side: Results -->
+            <div class="result-section">
+                <p>Total Value will be approx:</p>
+                <h3 id="topTotalValue">₹ 11,61,695</h3>
+                
+                <div class="chart-container">
+                    <canvas id="sipChart"></canvas>
+                </div>
+
+                <div class="breakdown-horizontal">
+                    <div class="breakdown-item">
+                        <span class="dot invested"></span> Investment Amt
+                        <strong id="investedAmt">₹ 6,00,000</strong>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="dot gained"></span> Wealth Gain
+                        <strong id="gainedAmt">₹ 5,61,695</strong>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="dot total"></span> Total Value
+                        <strong id="bottomTotalValue">₹ 11,61,695</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js Library (Placed at the bottom for safe loading) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Working Logic -->
+    <script>
+        // Use DOMContentLoaded to make sure everything is fully loaded before JS runs
+        document.addEventListener("DOMContentLoaded", function() {
+            
+            // Setup Elements
+            const tabSIP = document.getElementById('tabSIP');
+            const tabLump = document.getElementById('tabLump');
+            const sipInputs = document.getElementById('sipInputs');
+            const lumpInputs = document.getElementById('lumpInputs');
+            
+            const sipAmount = document.getElementById('sipAmount');
+            const sipRange = document.getElementById('sipRange');
+            const lumpAmount = document.getElementById('lumpAmount');
+            const lumpRange = document.getElementById('lumpRange');
+            const rate = document.getElementById('rate');
+            const rateRange = document.getElementById('rateRange');
+            const time = document.getElementById('time');
+            const timeRange = document.getElementById('timeRange');
+            
+            const topTotalValueEl = document.getElementById('topTotalValue');
+            const bottomTotalValueEl = document.getElementById('bottomTotalValue');
+            const investedAmtEl = document.getElementById('investedAmt');
+            const gainedAmtEl = document.getElementById('gainedAmt');
+
+            let myChart = null;
+            let isSIPActive = true; 
+
+            // Tab Switching Logic
+            tabSIP.addEventListener('click', function() {
+                isSIPActive = true;
+                tabSIP.classList.add('active');
+                tabLump.classList.remove('active');
+                sipInputs.style.display = 'block';
+                lumpInputs.style.display = 'none';
+                calculate();
+            });
+
+            tabLump.addEventListener('click', function() {
+                isSIPActive = false;
+                tabLump.classList.add('active');
+                tabSIP.classList.remove('active');
+                lumpInputs.style.display = 'block';
+                sipInputs.style.display = 'none';
+                calculate();
+            });
+
+            // Connect Text Box and Slider
+            function addSync(inputEl, sliderEl) {
+                inputEl.addEventListener('input', function() {
+                    sliderEl.value = this.value;
+                    calculate();
+                });
+                sliderEl.addEventListener('input', function() {
+                    inputEl.value = this.value;
+                    calculate();
+                });
+            }
+            
+            addSync(sipAmount, sipRange);
+            addSync(lumpAmount, lumpRange);
+            addSync(rate, rateRange);
+            addSync(time, timeRange);
+
+            // Calculation Logic
+            function calculate() {
+                let R = parseFloat(rate.value) || 0;      
+                let N = parseFloat(time.value) || 0;      
+                
+                let invested = 0;
+                let maturity = 0;
+
+                if(isSIPActive) {
+                    let P = parseFloat(sipAmount.value) || 0;
+                    if(P > 0 && R > 0 && N > 0) {
+                        let i = R / 12 / 100; 
+                        let months = N * 12;  
+                        invested = P * months;
+                        maturity = P * ((Math.pow(1 + i, months) - 1) / i) * (1 + i);
+                    }
+                } else {
+                    let P = parseFloat(lumpAmount.value) || 0;
+                    if(P > 0 && R > 0 && N > 0) {
+                        invested = P;
+                        maturity = P * Math.pow(1 + (R / 100), N);
+                    }
+                }
+
+                let wealthGained = maturity - invested;
+
+                // Make sure values don't show Negative or NaN
+                if (invested < 0) invested = 0;
+                if (wealthGained < 0) wealthGained = 0;
+                if (maturity < 0) maturity = 0;
+
+                investedAmtEl.innerText = '₹ ' + Math.round(invested).toLocaleString('en-IN');
+                gainedAmtEl.innerText = '₹ ' + Math.round(wealthGained).toLocaleString('en-IN');
+                topTotalValueEl.innerText = '₹ ' + Math.round(maturity).toLocaleString('en-IN');
+                bottomTotalValueEl.innerText = '₹ ' + Math.round(maturity).toLocaleString('en-IN');
+
+                // If values are 0, show a tiny grey graph instead of breaking
+                if(invested === 0 && wealthGained === 0) {
+                    updateChart(1, 0, true); 
+                } else {
+                    updateChart(invested, wealthGained, false);
+                }
+            }
+
+            // Chart Update Logic
+            function updateChart(invested, gained, isEmpty) {
+                let color1 = isEmpty ? '#334155' : '#3b82f6';
+                let color2 = isEmpty ? '#1e293b' : '#34d399';
+
+                if (myChart) {
+                    myChart.data.datasets[0].data = [invested, gained];
+                    myChart.data.datasets[0].backgroundColor = [color1, color2];
+                    myChart.update();
+                } else {
+                    const ctx = document.getElementById('sipChart').getContext('2d');
+                    myChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Investment', 'Wealth Gained'],
+                            datasets: [{
+                                data: [invested, gained],
+                                backgroundColor: [color1, color2],
+                                borderWidth: 0,
+                                cutout: '75%'
+                            }]
+                        },
+                        options: { 
+                            responsive: true, 
+                            plugins: { legend: { display: false } } 
+                        }
+                    });
+                }
+            }
+            
+            // First time run
+            calculate();
+        });
+    </script>
+</body>
+</html>
