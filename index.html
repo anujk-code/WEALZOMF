@@ -221,6 +221,8 @@
         <h2 style="color: var(--primary-blue); margin-bottom: 20px;">WEALZOMF Client Login</h2>
         <div><input type="text" id="panInput" placeholder="Enter PAN Number" style="margin: 10px; padding: 10px; width: 250px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px;"></div>
         <div><input type="text" id="folioInput" placeholder="Enter Folio Number" style="margin: 10px; padding: 10px; width: 250px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px;"></div>
+        <div><input type="password" id="pinInput" placeholder="Enter / Create 4-Digit PIN" style="margin-bottom: 15px; padding: 10px; width: 80%; border-radius: 4px; border: 1px solid #ccc;"></div>
+<p style="font-size: 12px; color: gray; margin-bottom: 15px;">First time users: Enter a new PIN to set it.</p>
         <br>
         <button id="loginBtn" style="padding: 10px 30px; font-size: 16px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 5px; margin-top: 10px;">Login</button>
         <p id="message" style="margin-top: 20px; font-weight: bold; font-size: 16px;"></p>
@@ -489,7 +491,7 @@
         <!-- Firebase & Login Logic Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBMcDGkSVzbM4HYZyzPl_yfG8EBeDgh-UQ",
@@ -504,72 +506,98 @@
         const db = getFirestore(app);
 
         window.addEventListener("DOMContentLoaded", () => {
-            const loginBtn = document.getElementById("loginBtn");
+    const loginBtn = document.getElementById("loginBtn");
+    
+    if (loginBtn) {
+        loginBtn.addEventListener("click", async () => {
+            const pan = document.getElementById("panInput").value.trim().toUpperCase();
+            const folio = document.getElementById("folioInput").value.trim();
+            const pin = document.getElementById("pinInput").value.trim(); // Yeh PIN wala box hai
+            const messageEl = document.getElementById("message");
 
-            if (loginBtn) {
-                loginBtn.addEventListener("click", async () => {
-                    const pan = document.getElementById("panInput").value.trim().toUpperCase();
-                    const folio = document.getElementById("folioInput").value.trim();
-                    const messageEl = document.getElementById("message");
+            if (!pan || !folio || !pin) {
+                messageEl.innerText = "Please enter PAN, Folio, and PIN!";
+                messageEl.style.color = "orange";
+                return;
+            }
 
-                    if (!pan || !folio) {
-                        messageEl.innerText = "Please enter both PAN and Folio Number!";
-                        messageEl.style.color = "orange";
-                        return;
-                    }
+            messageEl.innerText = "Connecting to database...";
+            messageEl.style.color = "blue";
 
-                    messageEl.innerText = "Connecting to database...";
-                    messageEl.style.color = "blue";
+            try {
+                // Firebase se data nikalna
+                const querySnapshot = await getDocs(collection(db, "client"));
+                
+                let isClientFound = false;
+                let loginSuccess = false;
+                let isNewUser = false;
+                let loggedInClientData = null;
+                let clientDocId = null;
 
-                    try {
-                        const querySnapshot = await getDocs(collection(db, "client"));
-                        let loginSuccess = false;
-                        let loggedInName = "";
-                        let loggedInFolio = "";
+                querySnapshot.forEach((docSnap) => {
+                    let data = docSnap.data();
+                    let dbPan = String(data.pan || "").trim().toUpperCase();
+                    let dbFolio = String(data.folio || "").trim();
 
-                        querySnapshot.forEach((doc) => {
-                            let data = doc.data();
-                            
-                            // Database ki value ko bhi capital mein check karega taaki mismatch na ho
-                            let dbPan = String(data.pan || "").trim().toUpperCase();
-                            let dbFolio = String(data.folio || "").trim();
-                            
-                            if (dbPan === pan && dbFolio === folio) {
-                                loginSuccess = true;
-                                loggedInName = data.name;
-                                loggedInFolio = data.folio;
-                                window.loggedInClient = data;
-                            }
-                        });
-
-                        if (loginSuccess) {
-                            localStorage.setItem("clientName", loggedInName);
-                            localStorage.setItem("clientPan", pan);
-                            localStorage.setItem("clientFolio", loggedInFolio);
-                            
-                            localStorage.setItem("clientScheme", window.loggedInClient.scheme || "-");
-                            localStorage.setItem("clientUnits", window.loggedInClient.units || 0);
-                            localStorage.setItem("clientInvestment", window.loggedInClient.investment || 0);
-                            localStorage.setItem("clientCurrentValue", window.loggedInClient.currentValue || 0);
-                            localStorage.setItem("clientProfitLoss", window.loggedInClient.profitLoss || 0);
-
-                            messageEl.innerText = "Login Successful! Redirecting...";
-                            messageEl.style.color = "green";
-                            
-                            setTimeout(() => {
-                                window.location.href = "dashboard.html";
-                            }, 1000);
-                        } else {
-                            messageEl.innerText = "Wrong PAN or Folio number!";
-                            messageEl.style.color = "red";
+                    if (dbPan === pan && dbFolio === folio) {
+                        isClientFound = true;
+                        loggedInClientData = data;
+                        clientDocId = docSnap.id;
+                        
+                        // Check karna ki PIN pehle se hai ya nahi
+                        if (!data.password) {
+                            isNewUser = true; 
+                        } else if (data.password === pin) {
+                            loginSuccess = true; 
                         }
-                    } catch (error) {
-                        messageEl.innerText = "Database Error: " + error.message;
-                        messageEl.style.color = "red";
                     }
                 });
+
+                if (isClientFound) {
+                    if (isNewUser) {
+                        // First time aane par PIN save karna
+                        const clientDocRef = doc(db, "client", clientDocId);
+                        await updateDoc(clientDocRef, { password: pin });
+                        
+                        loginSuccess = true;
+                        messageEl.innerText = "New PIN set successfully! Redirecting...";
+                        messageEl.style.color = "green";
+                    } else if (loginSuccess) {
+                        // Returning User ka PIN match ho gaya
+                        messageEl.innerText = "Login Successful! Redirecting...";
+                        messageEl.style.color = "green";
+                    } else {
+                        // PIN galat hone par
+                        messageEl.innerText = "Incorrect PIN!";
+                        messageEl.style.color = "red";
+                        return; // Code yahin ruk jayega, aage nahi jayega
+                    }
+                    
+                    // LocalStorage mein data set karna (Jaise aapke video mein tha)
+                    localStorage.setItem("ClientName", loggedInClientData.name || "");
+                    localStorage.setItem("ClientPan", pan);
+                    localStorage.setItem("ClientFolio", loggedInClientData.folio || "");
+                    localStorage.setItem("ClientUnits", loggedInClientData.units || "");
+                    localStorage.setItem("ClientCurrentValue", loggedInClientData.currentValue || "");
+                    localStorage.setItem("ClientInvestedAmount", loggedInClientData.investedAmount || "");
+                    localStorage.setItem("ClientProfitLoss", loggedInClientData.profitLoss || "");
+                    
+                    setTimeout(() => {
+                        window.location.href = "dashboard.html";
+                    }, 1000);
+
+                } else {
+                    messageEl.innerText = "Wrong PAN or Folio number!";
+                    messageEl.style.color = "red";
+                }
+
+            } catch (error) {
+                messageEl.innerText = "Database Error: " + error.message;
+                messageEl.style.color = "red";
             }
         });
+    }
+});
     </script>
     <script>
     document.addEventListener("DOMContentLoaded", function() {
