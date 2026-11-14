@@ -1,0 +1,1087 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <m<eta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEALTHVRIDHI - Mutual Fund Distributor</title>
+    <style>
+        /* CSS reset & base */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; line-height: 1.6; }
+        
+        /* Colors */
+        :root { --primary-blue: #0a2540; --secondary-blue: #0070f3; --light-gray: #e6ebf1; --white: #ffffff; --accent: #ff6b6b; }
+        
+        /* Navigation */
+        header { background-color: var(--primary-blue); color: var(--white); padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.8rem; font-weight: bold; letter-spacing: 1px; color: var(--white); text-decoration: none; }
+        nav a { color: var(--white); text-decoration: none; margin-left: 20px; font-weight: 500; }
+        nav a:hover { color: var(--secondary-blue); }
+        
+        /* Hero Carousel Banner */
+        .hero-slider { position: relative; width: 100%; height: 400px; overflow: hidden; background-color: var(--primary-blue); }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.8s ease-in-out; display: flex; align-items: center; justify-content: center; text-align: center; color: white; padding: 20px; }
+        .slide.active { opacity: 1; z-index: 1; }
+        .slide-content h1 { font-size: 3rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .slide-content p { font-size: 1.2rem; margin-bottom: 20px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+        .slide-btn { padding: 12px 30px; background-color: var(--accent); color: white; border: none; border-radius: 25px; font-size: 1.1rem; cursor: pointer; text-decoration: none; font-weight: bold; transition: background 0.3s; }
+        .slide-btn:hover { background-color: #ff4757; }
+        
+        /* Slide Backgrounds */
+        .bg-1 { background: linear-gradient(135deg, #0a2540 0%, #0070f3 100%); }
+        .bg-2 { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+        .bg-3 { background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); }
+        
+        /* Slider Controls */
+        .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; font-size: 2rem; padding: 10px 15px; cursor: pointer; z-index: 10; border-radius: 5px; }
+        .slider-arrow:hover { background: rgba(0,0,0,0.8); }
+        .prev { left: 20px; }
+        .next { right: 20px; }
+        
+        /* Main Sections */
+        section { padding: 60px 5%; max-width: 1200px; margin: auto; }
+        .section-title { text-align: center; font-size: 2.2rem; color: var(--primary-blue); margin-bottom: 40px; }
+        
+        /* About / Advisor Section */
+        .advisor-card { background: var(--white); border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; overflow: hidden; margin-bottom: 40px; border-bottom: 5px solid var(--primary-blue); }
+        .advisor-image { flex: 1; min-width: 300px; background: linear-gradient(to bottom right, #e6ebf1, #ffffff); display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .advisor-photo { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border: 3px solid var(--primary-blue); }
+        .advisor-info { flex: 2; padding: 40px; min-width: 300px; }
+        .advisor-info h2 { color: var(--primary-blue); margin-bottom: 10px; font-size: 2rem; }
+        .arn-badge { display: inline-block; background-color: var(--light-gray); color: var(--primary-blue); padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-bottom: 20px; border: 1px solid #ccc; }
+        
+        /* Services */
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .service-box { background: var(--white); padding: 30px; border-radius: 8px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: transform 0.3s; border-top: 4px solid var(--secondary-blue); }
+        .service-box:hover { transform: translateY(-5px); }
+        .service-box h3 { color: var(--primary-blue); margin-bottom: 15px; }
+        
+        /* Client Portal */
+        .login-portal { background: var(--white); padding: 40px; border-radius: 10px; text-align: center; margin: 40px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .login-btn { display: inline-block; background: var(--primary-blue); color: white; padding: 12px 30px; margin: 10px; text-decoration: none; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        .login-btn:hover { background: var(--secondary-blue); }
+        
+        /* Calculators */
+        .calc-container { background: var(--white); padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 800px; margin: auto; }
+        .calc-tabs { display: flex; justify-content: center; margin-bottom: 20px; border-bottom: 2px solid var(--light-gray); }
+        .tab-btn { background: none; border: none; padding: 10px 20px; font-size: 1.1rem; cursor: pointer; color: #666; font-weight: bold; }
+        .tab-btn.active { color: var(--secondary-blue); border-bottom: 3px solid var(--secondary-blue); }
+        
+        .calc-form { display: grid; gap: 15px; }
+        .input-group { display: flex; flex-direction: column; text-align: left; }
+        .input-group label { margin-bottom: 5px; font-weight: bold; color: var(--primary-blue); }
+        .input-group input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
+        .calc-result { margin-top: 20px; padding: 20px; background: var(--light-gray); border-radius: 5px; text-align: center; }
+        .calc-result h3 { color: var(--primary-blue); font-size: 1.8rem; }
+        
+        /* Contact Form */
+        .contact-section { display: flex; flex-wrap: wrap; gap: 40px; background: var(--white); padding: 40px; border-radius: 10px; }
+        .contact-info { flex: 1; min-width: 300px; }
+        .contact-form { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; }
+        .contact-form input, .contact-form textarea { padding: 12px; border: 1px solid #ccc; border-radius: 5px; }
+        .contact-form button { background: var(--primary-blue); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
+        /* Footer */
+        footer { background: var(--primary-blue); color: #ccc; text-align: center; padding: 30px 20px; margin-top: 40px; font-size: 0.9rem; }
+        .disclaimer { border: 1px solid #555; padding: 15px; margin: 20px auto; max-width: 800px; font-size: 0.8rem; text-align: left; }
+        
+        /* WhatsApp Floating Icon */
+        .whatsapp-float { position: fixed; bottom: 30px; right: 30px; background-color: #25d366; color: white; border-radius: 50px; padding: 15px 25px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; display: flex; align-items: center; gap: 10px; }
+        .whatsapp-float:hover { background-color: #128c7e; }
+        
+        /* Responsive */
+        @media(max-width: 768px) {
+            header { flex-direction: column; gap: 15px; }
+            .slide-content h1 { font-size: 2rem; }
+            .advisor-card { flex-direction: column; text-align: center; }
+        }
+    </style>
+    <!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    /* Advanced Calculator CSS */
+    .calculator-container {
+        font-family: 'Inter', sans-serif;
+        background-color: #1e293b;
+        color: #f8fafc;
+        width: 100%;
+        max-width: 950px;
+        margin: 50px auto; /* Page ke center mein rakhne ke liye */
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .brand-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 25px; font-size: 22px; font-weight: 700; }
+    .brand-logo svg { width: 28px; height: 28px; }
+    .text-WEALTH { color: #f8fafc; }
+    .text-VRIDHI { color: #34d399; }
+    .calc-header h2 { margin: 0 0 20px 0; font-size: 24px; color: #fff; }
+    .tabs { display: flex; gap: 0; margin-bottom: 30px; background: #0f172a; border-radius: 8px; overflow: hidden; width: fit-content; }
+    .tab-btn { background: transparent; border: 1px solid #334155; color: #94a3b8; padding: 12px 40px; font-size: 16px; cursor: pointer; font-family: inherit; font-weight: 600; transition: 0.3s; }
+    .tab-btn.active { background-color: #3b82f6; color: #fff; border-color: #3b82f6; }
+    .calc-body { display: flex; flex-wrap: wrap; gap: 30px; }
+    .input-section { flex: 1; min-width: 320px; }
+    .result-section { flex: 1; min-width: 320px; background-color: #243447; padding: 30px; border-radius: 12px; text-align: center; }
+    .input-group { margin-bottom: 25px; }
+    .input-group label { display: block; font-size: 14px; color: #e2e8f0; margin-bottom: 8px; text-align: left;}
+    .input-row { display: flex; justify-content: space-between; align-items: center; background-color: #334155; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; }
+    .input-row input[type="number"] { background: none; border: none; color: #fff; font-size: 16px; width: 100%; outline: none; }
+    input[type="range"] { width: 100%; accent-color: #3b82f6; height: 6px; background: #475569; border-radius: 5px; outline: none; cursor: pointer; }
+    .result-section p { color: #94a3b8; margin-bottom: 10px; font-size: 15px;}
+    .result-section h3 { font-size: 36px; margin: 0 0 30px 0; color: #34d399; }
+    .chart-container { width: 220px; margin: 0 auto; position: relative; }
+    .breakdown-horizontal { display: flex; justify-content: space-between; margin-top: 40px; text-align: center; font-size: 12px; color: #cbd5e1; }
+    .breakdown-item { flex: 1; }
+    .breakdown-item strong { display: block; font-size: 15px; margin-top: 6px; color: #fff; }
+    .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+    .dot.invested { background-color: #3b82f6; } 
+    .dot.gained { background-color: #34d399; } 
+    .dot.total { background-color: #8b5cf6; } 
+    @media (max-width: 768px) { .calc-body { flex-direction: column; } .calculator-container { padding: 20px; margin: 20px 10px; } .breakdown-horizontal { flex-direction: column; gap: 15px;} }
+</style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <a href="#" class="logo" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
+    <!-- Graph Icon -->
+    <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 30px; height: 30px;">
+        <path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-5 5"/>
+        <circle cx="18" cy="9" r="2" fill="#34d399" stroke="none"/>
+        <circle cx="13" cy="14" r="2" fill="#34d399" stroke="none"/>
+        <circle cx="9" cy="10" r="2" fill="#34d399" stroke="none"/>
+    </svg>
+    <!-- Dual Color Text -->
+    <div style="display: flex; font-weight: bold;">
+        <span style="color: #ffffff;">WEALTH</span>
+        <span style="color: #34d399;">VRIDHI</span>
+    </div>
+</a>
+        <nav>
+            <a href="#about">About</a>
+            <a href="#services">Services</a>
+            <a href="#calculator">Calculators</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <!-- Auto Sliding Banner -->
+    <div class="hero-slider">
+        <button class="slider-arrow prev" onclick="changeSlide(-1)">&#10094;</button>
+        <button class="slider-arrow next" onclick="changeSlide(1)">&#10095;</button>
+        
+        <div class="slide bg-1 active">
+            <div class="slide-content">
+                <h1>#MissionWealth</h1>
+                <p>Start your wealth creation journey with SIPs starting just ₹500/month.</p>
+                <a href="#calculator" class="slide-btn">Calculate SIP Now</a>
+            </div>
+        </div>
+        
+        <div class="slide bg-2">
+            <div class="slide-content">
+                <h1>Save Tax Smartly</h1>
+                <p>Invest in ELSS Mutual Funds and save up to ₹46,800 in taxes under Section 80C.</p>
+                <a href="#contact" class="slide-btn">Start ELSS Today</a>
+            </div>
+        </div>
+        
+        <div class="slide bg-3">
+            <div class="slide-content">
+                <h1>Plan Your Retirement</h1>
+                <p>Build a 1 Crore+ corpus with disciplined investing. Secure your family's future.</p>
+                <a href="#contact" class="slide-btn">Book Consultation</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Advisor -->
+    <section id="about">
+        <h2 class="section-title">Meet Your Advisor</h2>
+        <div class="advisor-card">
+            <div class="advisor-image">
+                <!-- IMPORTANT: Make sure rohit-sir.png is in the same folder -->
+                <img src="rohit-sir.png" alt="Rohit kumar Singh - Advisor" class="advisor-photo">
+            </div>
+            <div class="advisor-info">
+                <h2>Rohit kumar Singh</h2>
+                <div class="arn-badge">AMFI Registered Mutual Fund Distributor | ARN-342662</div>
+                <p>Hello! I am Rohit kumar Singh, your trusted financial partner at WEALTHVRIDHI. With a deep understanding of market dynamics and a commitment to your financial well-being, I help individuals and families create long-term wealth.</p>
+                <br>
+                <p>Whether you want to start your first SIP, save taxes, or plan for your child's education and your retirement, I provide personalized investment strategies tailored to your unique goals.</p>
+            </div>
+        </div>
+    </section>
+
+   
+
+<!-- === NAYA PAGE 2 HTML (SERVICES SECTION - IMAGE CENTERED, NO BOX BACKGROUND) === -->
+<section id="services" class="services-section" style="padding: 60px 20px; background-color: #f8fafc; text-align: center;">
+    <div style="max-width: 1280px; margin: 0 auto;">
+        <h2 style="font-size: 32px; color: #1e3a8a; margin-bottom: 10px; font-weight: bold;">Our Services</h2>
+        <p style="color: #64748b; margin-bottom: 40px; font-size: 16px;">Smart financial and insurance solutions for every life stage.</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+            
+            <!-- Card 1: Mutual Fund & SIP -->
+            <div style="background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                <img src="mutual-funds.png" alt="Mutual Fund & SIP" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 15px;">
+                <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Mutual Fund & SIP</h3>
+                <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">Top AMCs Certified</span>
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">SIP ₹500/Mo</span>
+                </div>
+                <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.5;">Grow your wealth steadily over time with professional guidance on SIPs, Lumpsum, and goal-based equity planning.</p>
+            </div>
+
+            <!-- Card 2: Fixed Deposit -->
+            <div style="background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <img src="health-motor.png" alt="Fixed Deposit" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 15px;">
+                <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Fixed Deposit</h3>
+                <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">SBI, HDFC & Corporates</span>
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">100% Safe</span>
+                </div>
+                <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.5;">Secure your capital with guaranteed and risk-free returns across top-tier banking and corporate fixed deposit schemes.</p>
+            </div>
+
+            <!-- Card 3: Child Future Savings -->
+            <div style="background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <img src="family-insurance.png" alt="Child Future Savings" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 15px;">
+                <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Child Future Savings</h3>
+                <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">Education & Marriage</span>
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">Goal-Based</span>
+                </div>
+                <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.5;">Plan early for your children's higher education and career milestones with dedicated long-term investment funds.</p>
+            </div>
+
+            <!-- Card 4: Retirement Savings -->
+            <div style="background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <img src="mutual-funds.png" alt="Retirement Savings" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 15px;">
+                <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Retirement Savings</h3>
+                <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">Pension & Passive Income</span>
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">Post-Retirement</span>
+                </div>
+                <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.5;">Build a robust retirement corpus to ensure complete financial independence and a stress-free post-retirement lifestyle.</p>
+            </div>
+
+            <!-- Card 5: Tax Savings ELSS -->
+            <div style="background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <img src="health-motor.png" alt="Tax Savings ELSS" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 15px;">
+                <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Tax Savings ELSS</h3>
+                <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">Save under 80C</span>
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">ELSS Equity Growth</span>
+                </div>
+                <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.5;">Save tax legally under Section 80C while earning high equity-linked growth with the lowest lock-in period of 3 years.</p>
+            </div>
+
+            <!-- Card 6: Life Insurance -->
+            <div style="background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <img src="family-insurance.png" alt="Life Insurance" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 15px;">
+                <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Life Insurance</h3>
+                <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">LIC & TATA Partners</span>
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">Family Security</span>
+                </div>
+                <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.5;">Protect your family’s financial future against uncertainties with trusted term life and endowment plans from industry leaders.</p>
+            </div>
+
+            <!-- Card 7: Health Insurance -->
+            <div style="background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <img src="health-motor.png" alt="Health Insurance" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 15px;">
+                <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Health Insurance</h3>
+                <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">Top Cashless Networks</span>
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">Medical Safety Net</span>
+                </div>
+                <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.5;">Safeguard your savings from heavy medical expenses with comprehensive cashless hospitalization and health covers.</p>
+            </div>
+
+            <!-- Card 8: General Insurance -->
+            <div style="background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <img src="mutual-funds.png" alt="General Insurance" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 15px;">
+                <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 10px;">General Insurance</h3>
+                <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">Car, Bike & Asset Cover</span>
+                    <span style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600;">Instant Claims</span>
+                </div>
+                <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.5;">Protect your valuable physical assets including vehicles and property with quick claim settlement general policies.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ========================================== -->
+<!-- ========================================== -->
+<!-- ========================================== -->
+<!-- === CALCULATOR SECTION (ORIGINAL THEME + SWP) === -->
+<!-- ========================================== -->
+
+<section id="calculator">
+    <div class="calculator-container">
+        <div class="brand-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-5 5"/>
+                <circle cx="18" cy="9" r="2" fill="#34d399" stroke="none"/>
+                <circle cx="13" cy="14" r="2" fill="#34d399" stroke="none"/>
+                <circle cx="9" cy="10" r="2" fill="#34d399" stroke="none"/>
+            </svg>
+            <div>
+                <span class="text-wealth">WEALTH</span><span class="text-vridhi">VRIDHI</span>
+            </div>
+        </div>
+
+        <div class="calc-header">
+            <h2>Smart Financial Calculators</h2>
+        </div>
+
+        <!-- 4 Clean Tabs (SWP Added) -->
+        <div class="tabs">
+            <button class="tab-btn active" id="tabSIP" onclick="switchCalcTab('sip')">SIP Calculator</button>
+            <button class="tab-btn" id="tabLump" onclick="switchCalcTab('lump')">Lumpsum</button>
+            <button class="tab-btn" id="tabStepUp" onclick="switchCalcTab('stepup')">Step-Up SIP</button>
+            <button class="tab-btn" id="tabSWP" onclick="switchCalcTab('swp')">SWP</button>
+        </div>
+
+        <div class="calc-body">
+            <div class="input-section">
+                
+                <!-- Principal Amount -->
+                <div class="input-group" id="group-amount">
+                    <label id="label-amount">Monthly Investment (₹)</label>
+                    <div class="input-row">
+                        <input type="number" id="sipAmount" value="5000" oninput="syncInput('amount')">
+                    </div>
+                    <input type="range" id="sipRange" min="500" max="10000000" step="500" value="5000" oninput="syncRange('amount')">
+                </div>
+
+                <!-- Monthly Withdrawal for SWP (Hidden by default) -->
+                <div class="input-group" id="group-swp" style="display: none;">
+                    <label style="color: #f43f5e;">Monthly Withdrawal (₹)</label>
+                    <div class="input-row">
+                        <input type="number" id="swpAmount" value="10000" min="500" max="500000" step="500" oninput="syncInput('swp')">
+                    </div>
+                    <input type="range" id="swpRange" min="500" max="500000" step="500" value="10000" oninput="syncRange('swp')">
+                </div>
+
+                <!-- Step-Up % (Hidden by default) -->
+                <div class="input-group" id="group-stepup" style="display: none;">
+                    <label>Annual Step-Up Increment (%)</label>
+                    <div class="input-row">
+                        <input type="number" id="stepupAmount" value="10" min="0" max="25" step="1" oninput="syncInput('stepup')">
+                    </div>
+                    <input type="range" id="stepupRange" min="0" max="25" step="1" value="10" oninput="syncRange('stepup')">
+                </div>
+
+                <!-- Rate & Time -->
+                <div class="input-group">
+                    <label>Expected Return Rate (p.a %)</label>
+                    <div class="input-row">
+                        <input type="number" id="rate" value="12" min="1" max="30" step="0.5" oninput="syncInput('rate')">
+                    </div>
+                    <input type="range" id="rateRange" min="1" max="30" step="0.5" value="12" oninput="syncRange('rate')">
+                </div>
+
+                <div class="input-group">
+                    <label>Time Period (Years)</label>
+                    <div class="input-row">
+                        <input type="number" id="time" value="10" min="1" max="40" step="1" oninput="syncInput('time')">
+                    </div>
+                    <input type="range" id="timeRange" min="1" max="40" step="1" value="10" oninput="syncRange('time')">
+                </div>
+
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-section">
+                <p id="topResultText">Total Value will be approx:</p>
+                <h3 id="topTotalValue">₹ 0</h3>
+
+                <div class="chart-container">
+                    <canvas id="sipChart"></canvas>
+                </div>
+
+                <div class="breakdown-horizontal">
+                    <div class="breakdown-item">
+                        <span class="dot invested" id="dot1"></span> 
+                        <span id="label-val1">Investment Amt</span> 
+                        <strong id="val1Output">₹ 0</strong>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="dot gained" id="dot2" style="background-color: #10b981;"></span> 
+                        <span id="label-val2">Wealth Gain</span> 
+                        <strong id="val2Output">₹ 0</strong>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="dot total"></span> 
+                        <span id="label-val3">Total Value</span> 
+                        <strong id="bottomTotalValue">₹ 0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========================================== -->
+<!-- === JAVASCRIPT & CHART SECTION === -->
+<!-- ========================================== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let currentTab = 'sip';
+    let myChart = null; 
+
+    function switchCalcTab(tab) {
+        currentTab = tab;
+        
+        document.getElementById('tabSIP').classList.remove('active');
+        document.getElementById('tabLump').classList.remove('active');
+        document.getElementById('tabStepUp').classList.remove('active');
+        document.getElementById('tabSWP').classList.remove('active');
+        
+        if(tab === 'sip') document.getElementById('tabSIP').classList.add('active');
+        if(tab === 'lump') document.getElementById('tabLump').classList.add('active');
+        if(tab === 'stepup') document.getElementById('tabStepUp').classList.add('active');
+        if(tab === 'swp') document.getElementById('tabSWP').classList.add('active');
+
+        document.getElementById('group-stepup').style.display = 'none';
+        document.getElementById('group-swp').style.display = 'none';
+
+        if(tab === 'lump') {
+            document.getElementById('label-amount').innerText = 'Total Lumpsum Investment (₹)';
+            updateLabels('Invested Amt', 'Wealth Gain', 'Total Value will be approx:', 'Total Value');
+        } else if(tab === 'stepup') {
+            document.getElementById('label-amount').innerText = 'Initial Monthly Investment (₹)';
+            document.getElementById('group-stepup').style.display = 'block';
+            updateLabels('Invested Amt', 'Wealth Gain', 'Total Value will be approx:', 'Total Value');
+        } else if(tab === 'swp') {
+            document.getElementById('label-amount').innerText = 'Total Investment (Principal ₹)';
+            document.getElementById('group-swp').style.display = 'block';
+            document.getElementById('sipAmount').value = "1000000"; 
+            document.getElementById('sipRange').value = "1000000";
+            updateLabels('Total Investment', 'Total Withdrawn', 'Final Balance will be approx:', 'Final Balance');
+        } else {
+            document.getElementById('label-amount').innerText = 'Monthly Investment (₹)';
+            updateLabels('Invested Amt', 'Wealth Gain', 'Total Value will be approx:', 'Total Value');
+        }
+
+        calculateValues();
+    }
+
+    function updateLabels(l1, l2, topText, l3) {
+        document.getElementById('label-val1').innerText = l1;
+        document.getElementById('label-val2').innerText = l2;
+        document.getElementById('topResultText').innerText = topText;
+        document.getElementById('label-val3').innerText = l3;
+    }
+
+    function syncInput(type) {
+        if(type === 'amount') document.getElementById('sipRange').value = document.getElementById('sipAmount').value;
+        else if(type === 'stepup') document.getElementById('stepupRange').value = document.getElementById('stepupAmount').value;
+        else if(type === 'swp') document.getElementById('swpRange').value = document.getElementById('swpAmount').value;
+        else if(type === 'rate') document.getElementById('rateRange').value = document.getElementById('rate').value;
+        else if(type === 'time') document.getElementById('timeRange').value = document.getElementById('time').value;
+        calculateValues();
+    }
+
+    function syncRange(type) {
+        if(type === 'amount') document.getElementById('sipAmount').value = document.getElementById('sipRange').value;
+        else if(type === 'stepup') document.getElementById('stepupAmount').value = document.getElementById('stepupRange').value;
+        else if(type === 'swp') document.getElementById('swpAmount').value = document.getElementById('swpRange').value;
+        else if(type === 'rate') document.getElementById('rate').value = document.getElementById('rateRange').value;
+        else if(type === 'time') document.getElementById('time').value = document.getElementById('timeRange').value;
+        calculateValues();
+    }
+
+    function calculateValues() {
+        let p = parseFloat(document.getElementById('sipAmount').value) || 0;
+        let rAnnual = parseFloat(document.getElementById('rate').value) || 0;
+        let years = parseFloat(document.getElementById('time').value) || 0;
+        let rMonthly = rAnnual / 100 / 12;
+        let months = years * 12;
+
+        let val1 = 0; 
+        let val2 = 0; 
+        let val3 = 0; 
+
+        if(currentTab === 'lump') {
+            val1 = p;
+            val3 = p * Math.pow((1 + (rAnnual / 100)), years);
+            val2 = val3 - val1;
+        } 
+        else if(currentTab === 'sip') {
+            val1 = p * months;
+            if(rMonthly > 0) {
+                val3 = p * ((Math.pow(1 + rMonthly, months) - 1) / rMonthly) * (1 + rMonthly);
+            } else {
+                val3 = val1;
+            }
+            val2 = val3 - val1;
+        } 
+        else if(currentTab === 'stepup') {
+            let stepupPercent = parseFloat(document.getElementById('stepupAmount').value) / 100;
+            let currentMonthly = p;
+            for(let y = 0; y < years; y++) {
+                for(let m = 0; m < 12; m++) {
+                    val1 += currentMonthly;
+                    let monthsRemaining = (years * 12) - (y * 12 + m);
+                    val3 += currentMonthly * Math.pow(1 + rMonthly, monthsRemaining);
+                }
+                currentMonthly += currentMonthly * stepupPercent; 
+            }
+            val2 = val3 - val1;
+        }
+        else if(currentTab === 'swp') {
+            let w = parseFloat(document.getElementById('swpAmount').value) || 0;
+            val1 = p; 
+            val2 = w * months; 
+            
+            if(rMonthly > 0) {
+                val3 = (p * Math.pow(1 + rMonthly, months)) - (w * ((Math.pow(1 + rMonthly, months) - 1) / rMonthly));
+            } else {
+                val3 = p - val2;
+            }
+            if(val3 < 0) val3 = 0; 
+        }
+
+        if(val2 < 0 && currentTab !== 'swp') val2 = 0;
+
+        document.getElementById('topTotalValue').innerText = '₹ ' + Math.round(val3).toLocaleString('en-IN');
+        document.getElementById('val1Output').innerText = '₹ ' + Math.round(val1).toLocaleString('en-IN');
+        document.getElementById('val2Output').innerText = '₹ ' + Math.round(val2).toLocaleString('en-IN');
+        document.getElementById('bottomTotalValue').innerText = '₹ ' + Math.round(val3).toLocaleString('en-IN');
+
+        // Dynamic Chart Colors (Red for SWP withdrawal, Green for Wealth Gain)
+        let dot2 = document.getElementById('dot2');
+        if(currentTab === 'swp') {
+            dot2.style.backgroundColor = '#f43f5e'; 
+            updateChart(Math.round(val3), Math.round(val2), ['Final Balance', 'Total Withdrawn'], ['#3b82f6', '#f43f5e']);
+        } else {
+            dot2.style.backgroundColor = '#10b981'; 
+            updateChart(Math.round(val1), Math.round(val2), ['Invested Amount', 'Wealth Gained'], ['#3b82f6', '#10b981']);
+        }
+    }
+
+    function updateChart(data1, data2, labels, colors) {
+        let ctx = document.getElementById('sipChart');
+        if(!ctx) return;
+        if (myChart) myChart.destroy();
+
+        myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: [data1, data2],
+                    backgroundColor: colors, 
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%', 
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        calculateValues();
+    });
+</script>
+
+<!-- === AMC SECTION KI CSS (Ise <style> ke andar update karein) === -->
+<style>
+    .marquee-wrapper {
+        display: flex;
+        overflow: hidden;
+        width: 100%;
+        max-width: 1280px;
+        margin: 0 auto 20px auto; /* 20px ka gap dono lines ke beech */
+    }
+    
+    .marquee-track-1 {
+        display: flex;
+        gap: 20px;
+        flex-shrink: 0;
+        animation: scroll-left 25s linear infinite;
+        padding-right: 20px;
+    }
+    
+    /* Doosri line thodi alag speed se chalegi toh aur premium lagega */
+    .marquee-track-2 {
+        display: flex;
+        gap: 20px;
+        flex-shrink: 0;
+        animation: scroll-left 32s linear infinite; 
+        padding-right: 20px;
+    }
+
+    .marquee-wrapper:hover .marquee-track-1,
+    .marquee-wrapper:hover .marquee-track-2 {
+        animation-play-state: paused;
+    }
+
+    @keyframes scroll-left {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+
+    .amc-card {
+        width: 160px;
+        height: 75px;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-weight: bold;
+        font-size: 13px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        padding: 5px;
+        flex-shrink: 0; /* Card pichkenge nahi */
+    }
+    .amc-card img {
+        max-height: 35px;
+        max-width: 90%;
+        object-fit: contain;
+        margin-bottom: 5px;
+    }
+</style>
+
+<!-- === AMC SECTION KA HTML (Isse purane AMC wale part se replace karein) === -->
+<div style="margin-bottom: 70px; margin-top: 40px;">
+    <h2 style="font-size: 28px; color: hsl(224, 64%, 33%); margin-bottom: 10px; font-weight: bold; text-align: center;">Associated With Top AMCs & Trusted Partners</h2>
+    
+    <!-- 🟢 PEHLI LINE -->
+    <div class="marquee-wrapper">
+        <div class="marquee-track-1">
+            <!-- Set 1 -->
+            <div class="amc-card"><img src="lic.png" alt="LIC"> <span style="color: #0369a1;">LIC</span></div>
+            <div class="amc-card"><img src="tata.png" alt="TATA"> <span style="color: #1e40af;">TATA</span></div>
+            <div class="amc-card"><img src="hdfc.png" alt="HDFC"> <span style="color: #b91c1c;">HDFC MF</span></div>
+            <div class="amc-card"><img src="icici.png" alt="ICICI"> <span style="color: #c2410c;">ICICI PRU</span></div>
+            <div class="amc-card"><img src="sbi.png" alt="SBI"> <span style="color: #0284c7;">SBI MF</span></div>
+            <div class="amc-card"><img src="nippon.png" alt="Nippon"> <span style="color: #be123c;">Nippon India</span></div>
+            <div class="amc-card"><img src="uti.png" alt="UTI"> <span style="color: #f59e0b;">UTI MF</span></div>
+            <!-- Set 1 (Duplicate for loop) -->
+            <div class="amc-card"><img src="lic.png" alt="LIC"> <span style="color: #0369a1;">LIC</span></div>
+            <div class="amc-card"><img src="tata.png" alt="TATA"> <span style="color: #1e40af;">TATA</span></div>
+            <div class="amc-card"><img src="hdfc.png" alt="HDFC"> <span style="color: #b91c1c;">HDFC MF</span></div>
+            <div class="amc-card"><img src="icici.png" alt="ICICI"> <span style="color: #c2410c;">ICICI PRU</span></div>
+            <div class="amc-card"><img src="sbi.png" alt="SBI"> <span style="color: #0284c7;">SBI MF</span></div>
+            <div class="amc-card"><img src="nippon.png" alt="Nippon"> <span style="color: #be123c;">Nippon India</span></div>
+            <div class="amc-card"><img src="uti.png" alt="UTI"> <span style="color: #f59e0b;">UTI MF</span></div>
+        </div>
+    </div>
+
+    <!-- 🔵 DOOSRI LINE -->
+    <div class="marquee-wrapper">
+        <div class="marquee-track-2">
+            <!-- Set 2 -->
+            <div class="amc-card"><img src="axis.png" alt="Axis"> <span style="color: #8b2131;">Axis MF</span></div>
+            <div class="amc-card"><img src="kotak.png" alt="Kotak"> <span style="color: #b91c1c;">Kotak MF</span></div>
+            <div class="amc-card"><img src="mirae.png" alt="Mirae"> <span style="color: #c2410c;">Mirae Asset</span></div>
+            <div class="amc-card"><img src="dsp.png" alt="DSP"> <span style="color: #0284c7;">DSP MF</span></div>
+            <div class="amc-card"><img src="aditya.png" alt="ABSL"> <span style="color: #be123c;">Aditya Birla</span></div>
+            <div class="amc-card"><img src="motilal.png" alt="Motilal"> <span style="color: #0284c7;">Motilal Oswal</span></div>
+            <div class="amc-card"><img src="bandhan.png" alt="Bandhan"> <span style="color: #b91c1c;">Bandhan MF</span></div>
+            <!-- Set 2 (Duplicate for loop) -->
+            <div class="amc-card"><img src="axis.png" alt="Axis"> <span style="color: #8b2131;">Axis MF</span></div>
+            <div class="amc-card"><img src="kotak.png" alt="Kotak"> <span style="color: #b91c1c;">Kotak MF</span></div>
+            <div class="amc-card"><img src="mirae.png" alt="Mirae"> <span style="color: #c2410c;">Mirae Asset</span></div>
+            <div class="amc-card"><img src="dsp.png" alt="DSP"> <span style="color: #0284c7;">DSP MF</span></div>
+            <div class="amc-card"><img src="aditya.png" alt="ABSL"> <span style="color: #be123c;">Aditya Birla</span></div>
+            <div class="amc-card"><img src="motilal.png" alt="Motilal"> <span style="color: #0284c7;">Motilal Oswal</span></div>
+            <div class="amc-card"><img src="bandhan.png" alt="Bandhan"> <span style="color: #b91c1c;">Bandhan MF</span></div>
+        </div>
+    </div>
+</div>
+
+    <!-- === 2. Trust Metrics / Our Guarantee (CENTERED & STYLISH) === -->
+<div style="max-width: 1100px; margin: 0 auto 70px auto; padding-bottom: 50px; border-bottom: 1px solid #e2e8f0; text-align: center; display: flex; flex-direction: column; align-items: center;">
+    
+    <h2 style="font-size: 26px; color: #1e3a8a; margin-bottom: 30px; font-weight: bold; text-align: center; width: 100%;">
+        "Your Trusted Financial Partner" <br>
+        <span style="font-size: 16px; color: #64748b; font-weight: normal;">(Our Guarantee)</span>
+    </h2>
+    
+    <!-- Cards Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; width: 100%; max-width: 1000px;">
+        
+        <div class="guarantee-card">
+            <div class="guarantee-icon-wrapper">
+                <img src="amfi-logo.png" alt="AMFI Logo"> 
+            </div>
+            <h4 style="font-size: 15px; font-weight: bold; color: #1e293b; margin: 0; line-height: 1.4;">AMFI Registered & SECURE</h4>
+        </div>
+
+        <div class="guarantee-card">
+            <div class="guarantee-icon-wrapper">
+                <img src="handshake-icon.png" alt="Partnership">
+            </div>
+            <h4 style="font-size: 15px; font-weight: bold; color: #1e293b; margin: 0; line-height: 1.4;">In partnership with top insurance & AMC giants</h4>
+        </div>
+
+        <div class="guarantee-card">
+            <div class="guarantee-icon-wrapper">
+                <img src="zero-fee-icon.png" alt="No Hidden Fee">
+            </div>
+            <h4 style="font-size: 15px; font-weight: bold; color: #1e293b; margin: 0; line-height: 1.4;">Real-time client portal with zero hidden charges</h4>
+        </div>
+
+        <div class="guarantee-card">
+            <div class="guarantee-icon-wrapper">
+                <img src="target-icon.png" alt="Personalization">
+            </div>
+            <h4 style="font-size: 15px; font-weight: bold; color: #1e293b; margin: 0; line-height: 1.4;">100% Personalization (Tailor-made for your goals)</h4>
+        </div>
+
+    </div>
+</div>
+    <!-- === 3. WHAT OUR CLIENTS SAY (TESTIMONIALS) === -->
+<style>
+    /* Testimonial Carousel Styles */
+    .testi-wrapper {
+        position: relative;
+        max-width: 1040px;
+        margin: 0 auto;
+    }
+    .testi-scroll-area {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        gap: 24px;
+        padding-bottom: 20px;
+        -ms-overflow-style: none;  
+        scrollbar-width: none;  
+    }
+    .testi-scroll-area::-webkit-scrollbar {
+        display: none;
+    }
+    .testi-card {
+        min-width: 320px; 
+        flex-shrink: 0;
+        scroll-snap-align: start;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+        text-align: left;
+    }
+    .slider-btn {
+        background: white;
+        border: 1px solid #cbd5e1;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #1e293b;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: 0.2s;
+    }
+    .slider-btn:hover {
+        background: #f1f5f9;
+    }
+</style>
+
+<div style="margin-bottom: 50px; text-align: center;">
+    <h2 style="font-size: 28px; color: #1e3a8a; margin-bottom: 10px; font-weight: bold;">What Our Clients Say</h2>
+    
+    <div class="testi-wrapper">
+        <!-- Slider Buttons -->
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 15px; padding-right: 10px;">
+            <button class="slider-btn" onclick="slideTesti(-1)">&#10094;</button>
+            <button class="slider-btn" onclick="slideTesti(1)">&#10095;</button>
+        </div>
+
+        <!-- Swipeable Area -->
+        <div class="testi-scroll-area" id="testi-scroll">
+            
+            <div class="testi-card">
+                <div style="color: #f59e0b; font-size: 20px; margin-bottom: 12px; letter-spacing: 2px;">★★★★★</div>
+                <p style="font-size: 14px; color: #334155; line-height: 1.6; margin-bottom: 20px;">"Rohit bhai guided me to start my first SIP. Very professional and helpful!"</p>
+                <strong style="font-size: 14px; color: #1e293b; display: block;">Pankaj Kumar</strong> 
+                <span style="font-size: 13px; color: #64748b;">Chapra</span>
+            </div>
+
+            <div class="testi-card">
+                <div style="color: #f59e0b; font-size: 20px; margin-bottom: 12px; letter-spacing: 2px;">★★★★★</div>
+                <p style="font-size: 14px; color: #334155; line-height: 1.6; margin-bottom: 20px;">"Trusted advisors! Transparent processes and secure portal for tracking."</p>
+                <strong style="font-size: 14px; color: #1e293b; display: block;">Santosh Kumar</strong> 
+                <span style="font-size: 13px; color: #64748b;">Patna</span>
+            </div>
+
+            <div class="testi-card">
+                <div style="color: #f59e0b; font-size: 20px; margin-bottom: 12px; letter-spacing: 2px;">★★★★★</div>
+                <p style="font-size: 14px; color: #334155; line-height: 1.6; margin-bottom: 20px;">"The LIC & Tata insurance recommendation saved me money & secured my family."</p>
+                <strong style="font-size: 14px; color: #1e293b; display: block;">Manisha Singh</strong> 
+                <span style="font-size: 13px; color: #64748b;">Chapra</span>
+            </div>
+            
+            <div class="testi-card">
+                <div style="color: #f59e0b; font-size: 20px; margin-bottom: 12px; letter-spacing: 2px;">★★★★★</div>
+                <p style="font-size: 14px; color: #334155; line-height: 1.6; margin-bottom: 20px;">"Their step-up SIP calculator opened my eyes. Highly recommend their financial planning."</p>
+                <strong style="font-size: 14px; color: #1e293b; display: block;">Rahul Verma</strong>
+                <span style="font-size: 13px; color: #64748b;">IT Professional</span>
+            </div>
+
+        </div>
+
+        <!-- Dot Indicators -->
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 20px;">
+            <div style="width: 10px; height: 10px; background: #1e3a8a; border-radius: 50%;"></div>
+            <div style="width: 10px; height: 10px; background: #cbd5e1; border-radius: 50%;"></div>
+            <div style="width: 10px; height: 10px; background: #cbd5e1; border-radius: 50%;"></div>
+            <div style="width: 10px; height: 10px; background: #cbd5e1; border-radius: 50%;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Testimonial Slider JS -->
+<script>
+    function slideTesti(direction) {
+        const scrollContainer = document.getElementById('testi-scroll');
+        const scrollAmount = 344 * direction; // 320px card + 24px gap
+        scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+</script>
+<!-- ========================================== -->
+<!-- ========================================== -->
+
+    <!-- Contact Section -->
+<section id="contact" style="padding: 40px 20px; background-color: #f8fafc; font-family: Arial, sans-serif;">
+  <div style="max-width: 1100px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; gap: 40px; flex-wrap: wrap; align-items: flex-start;">
+    
+    <!-- Left Column: Contact Details -->
+    <div style="flex: 1; min-width: 300px;"
+      <h2 style="font-size: 24px; color: #1e293b; margin-bottom: 20px; font-weight: bold;">Contact Details</h2>
+      <div style="margin-bottom: 25px; line-height: 1.8; color: #334155;">
+        <p style="margin: 5px 0;"><strong>Advisor:</strong> Rohit Kumar Singh</p>
+        <p style="margin: 5px 0;"><strong>Brand:</strong> WEALTHVRIDHI</p>
+        <p style="margin: 5px 0;">
+          <strong>Phone:</strong> 
+          <a href="tel:+917079946867" style="color: #2563eb; text-decoration: none;">+91 7079946867</a>
+        </p>
+        <p style="margin: 5px 0;">
+          <strong>WhatsApp:</strong> 
+          <a href="https://wa.me/917079946867" target="_blank" style="color: #16a34a; text-decoration: none;">Chat on WhatsApp</a>
+        </p>
+        <p style="margin: 5px 0;">
+          <strong>Email:</strong> 
+          <a href="mailto:wealthvridhi@gmail.com" style="color: #2563eb; text-decoration: none;">wealthvridhi@gmail.com</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Column: Text & Form -->
+    <div style="flex: 1; min-width: 300px;">
+      <p style="color: #475569; font-size: 15px; margin-bottom: 20px; line-height: 1.5;">
+        Let's plan your financial journey today. Drop a message or call to book a free consultation.
+      </p>
+
+     <!-- Active Contact Form -->
+<form action="https://formspree.io/f/mgaabype" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+  <input type="text" name="name" placeholder="Your Name" required style="padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+  <input type="tel" name="phone" placeholder="Your Mobile Number" required style="padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+  <textarea name="message" rows="4" placeholder="How can we help you? (e.g. Want to start a SIP)" required style="padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; resize: vertical;"></textarea>
+  <button type="submit" style="background-color: #2563eb; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer;">Submit Details</button>
+</form>
+    </div>
+
+  </div>
+</section>
+    
+
+    <!-- Footer & Disclaimer -->
+    <footer>
+        <p>&copy; 2026 WEALTHVRIDHI - Rohit kumar Singh. All Rights Reserved.</p>
+        <div class="disclaimer">
+            <strong>Mandatory Disclaimer:</strong> Mutual Fund investments are subject to market risks, read all scheme related documents carefully. The calculators provided on this website are for illustrative purposes only and do not represent actual returns. Past performance is not an indicator of future returns. 
+            <br><br>
+            AMFI Registered Mutual Fund Distributor ARN-342662.
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/917079946867?text=Hello%20Rohit%20Sir,%20I%20want%20to%20know%20more%20about%20Mutual%20Funds." class="whatsapp-float" target="_blank">
+        💬 Chat on WhatsApp
+    </a>
+
+    <!-- JavaScript for Slider & Calculators -->
+    <script>
+        // Banner Slider Logic
+        let slideIndex = 0;
+        const slides = document.querySelectorAll(".slide");
+        
+        function showSlides() {
+            slides.forEach(slide => slide.classList.remove("active"));
+            slideIndex++;
+            if (slideIndex > slides.length) {slideIndex = 1}
+            slides[slideIndex-1].classList.add("active");
+            setTimeout(showSlides, 5000); // Change image every 5 seconds
+        }
+        
+        function changeSlide(n) {
+            slideIndex += n - 1;
+            if(slideIndex < 0) { slideIndex = slides.length - 1; }
+            slides.forEach(slide => slide.classList.remove("active"));
+            if (slideIndex >= slides.length) {slideIndex = 0}
+            slides[slideIndex].classList.add("active");
+        }
+        
+        // Start auto slider
+        setTimeout(showSlides, 5000);
+
+        // Calculator Tabs Logic
+        function switchTab(type) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('sip-form').style.display = 'none';
+            document.getElementById('lumpsum-form').style.display = 'none';
+            
+            if(type === 'sip') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('sip-form').style.display = 'grid';
+                calculateSIP();
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('lumpsum-form').style.display = 'grid';
+                calculateLumpsum();
+            }
+        }
+
+        // Calculator Math Logic
+        function formatRupee(number) {
+            return new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(number);
+        }
+
+        function calculateSIP() {
+            let P = parseFloat(document.getElementById('sipAmount').value);
+            let annualRate = parseFloat(document.getElementById('sipRate').value);
+            let years = parseFloat(document.getElementById('sipYears').value);
+            
+            if(isNaN(P) || isNaN(annualRate) || isNaN(years)) return;
+
+            let i = (annualRate / 100) / 12; // monthly rate
+            let n = years * 12; // total months
+            
+            // SIP Formula: M = P × ({[1 + i]^n - 1} / i) × (1 + i)
+            let M = P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
+            let invested = P * n;
+            let gained = M - invested;
+
+            document.getElementById('finalValue').innerText = '₹ ' + formatRupee(M);
+            document.getElementById('investedAmount').innerText = '₹ ' + formatRupee(invested);
+            document.getElementById('wealthGained').innerText = '₹ ' + formatRupee(gained);
+        }
+
+        function calculateLumpsum() {
+            let P = parseFloat(document.getElementById('lumAmount').value);
+            let annualRate = parseFloat(document.getElementById('lumRate').value);
+            let years = parseFloat(document.getElementById('lumYears').value);
+            
+            if(isNaN(P) || isNaN(annualRate) || isNaN(years)) return;
+
+            // Compound Interest Formula: A = P(1 + r/100)^n
+            let A = P * Math.pow((1 + (annualRate/100)), years);
+            let gained = A - P;
+
+            document.getElementById('finalValue').innerText = '₹ ' + formatRupee(A);
+            document.getElementById('investedAmount').innerText = '₹ ' + formatRupee(P);
+            document.getElementById('wealthGained').innerText = '₹ ' + formatRupee(gained);
+        }
+        </script>
+        <!-- Firebase & Login Logic Script -->
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const tabSIP = document.getElementById('tabSIP'), tabLump = document.getElementById('tabLump');
+        const sipInputs = document.getElementById('sipInputs'), lumpInputs = document.getElementById('lumpInputs');
+        const sipAmount = document.getElementById('sipAmount'), sipRange = document.getElementById('sipRange');
+        const lumpAmount = document.getElementById('lumpAmount'), lumpRange = document.getElementById('lumpRange');
+        const rate = document.getElementById('rate'), rateRange = document.getElementById('rateRange');
+        const time = document.getElementById('time'), timeRange = document.getElementById('timeRange');
+        const topTotalValueEl = document.getElementById('topTotalValue'), bottomTotalValueEl = document.getElementById('bottomTotalValue');
+        const investedAmtEl = document.getElementById('investedAmt'), gainedAmtEl = document.getElementById('gainedAmt');
+
+        let myChart = null;
+        let isSIPActive = true; 
+
+        tabSIP.addEventListener('click', function() {
+            isSIPActive = true; tabSIP.classList.add('active'); tabLump.classList.remove('active');
+            sipInputs.style.display = 'block'; lumpInputs.style.display = 'none'; calculate();
+        });
+
+        tabLump.addEventListener('click', function() {
+            isSIPActive = false; tabLump.classList.add('active'); tabSIP.classList.remove('active');
+            lumpInputs.style.display = 'block'; sipInputs.style.display = 'none'; calculate();
+        });
+
+        function addSync(inputEl, sliderEl) {
+            inputEl.addEventListener('input', function() { sliderEl.value = this.value; calculate(); });
+            sliderEl.addEventListener('input', function() { inputEl.value = this.value; calculate(); });
+        }
+        
+        addSync(sipAmount, sipRange); addSync(lumpAmount, lumpRange); addSync(rate, rateRange); addSync(time, timeRange);
+
+        function calculate() {
+            let R = parseFloat(rate.value) || 0, N = parseFloat(time.value) || 0;      
+            let invested = 0, maturity = 0;
+
+            if(isSIPActive) {
+                let P = parseFloat(sipAmount.value) || 0;
+                if(P > 0 && R > 0 && N > 0) {
+                    let i = R / 12 / 100, months = N * 12;  
+                    invested = P * months; maturity = P * ((Math.pow(1 + i, months) - 1) / i) * (1 + i);
+                }
+            } else {
+                let P = parseFloat(lumpAmount.value) || 0;
+                if(P > 0 && R > 0 && N > 0) { invested = P; maturity = P * Math.pow(1 + (R / 100), N); }
+            }
+
+            let wealthGained = maturity - invested;
+            if (invested < 0) invested = 0; if (wealthGained < 0) wealthGained = 0; if (maturity < 0) maturity = 0;
+
+            investedAmtEl.innerText = '₹ ' + Math.round(invested).toLocaleString('en-IN');
+            gainedAmtEl.innerText = '₹ ' + Math.round(wealthGained).toLocaleString('en-IN');
+            topTotalValueEl.innerText = '₹ ' + Math.round(maturity).toLocaleString('en-IN');
+            bottomTotalValueEl.innerText = '₹ ' + Math.round(maturity).toLocaleString('en-IN');
+
+            if(invested === 0 && wealthGained === 0) updateChart(1, 0, true); else updateChart(invested, wealthGained, false);
+        }
+
+        function updateChart(invested, gained, isEmpty) {
+            let color1 = isEmpty ? '#334155' : '#3b82f6', color2 = isEmpty ? '#1e293b' : '#34d399';
+            if (myChart) {
+                myChart.data.datasets[0].data = [invested, gained];
+                myChart.data.datasets[0].backgroundColor = [color1, color2];
+                myChart.update();
+            } else {
+                const ctx = document.getElementById('sipChart').getContext('2d');
+                myChart = new Chart(ctx, {
+                    type: 'doughnut', data: { labels: ['Investment', 'Wealth Gained'], datasets: [{ data: [invested, gained], backgroundColor: [color1, color2], borderWidth: 0, cutout: '75%' }] },
+                    options: { responsive: true, plugins: { legend: { display: false } } }
+                });
+            }
+        }
+        calculate();
+    });
+</script>
+</body>
+</html>

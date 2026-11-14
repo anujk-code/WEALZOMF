@@ -3,116 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WEALZOMF - Client Dashboard</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
-        header { background-color: #003366; color: white; padding: 20px; text-align: center; position: relative; }
-        .logout-btn { position: absolute; right: 20px; top: 25px; background: #ff4d4d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .logout-btn:hover { background: #cc0000; }
-        .container { max-width: 850px; margin: 40px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #003366; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
-        
-        /* Grid Layout for Portfolio Details */
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; }
-        .info-box { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 5px solid #003366; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .info-box span { display: block; font-size: 14px; color: #666; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
-        .info-box strong { font-size: 20px; color: #333; }
-        
-        /* Profit and Loss Colors */
-        .profit-text { color: #28a745 !important; font-weight: bold; }
-        .loss-text { color: #dc3545 !important; font-weight: bold; }
-    </style>
+    <title>WealthVriddhi Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body class="bg-gray-100 font-sans">
 
-    <header>
-        <h1>WEALZOMF Financial Services</h1>
-        <p>Client Portfolio Dashboard</p>
-        <button class="logout-btn" id="logoutBtn">Logout</button>
-    </header>
+    <!-- Top Navbar -->
+    <nav class="bg-blue-700 text-white p-4 shadow-md flex justify-between items-center">
+        <div>
+            <h1 class="text-xl font-bold">WealthVriddhi Dashboard</h1>
+            <p class="text-xs text-blue-200">ARN-342662 | AMFI Registered Mutual Fund Distributor</p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <!-- WhatsApp Contact Advisor Button (Apna 10-digit number 91 ke sath daalein) -->
+            <a href="https://wa.me/917079946867?text=Hello%20Rohit%20ji,%20mujhe%20apne%20Mutual%20Fund%20portfolio%20ke%20baare%20mein%20baat%20karni%20hai." 
+               target="_blank" 
+               class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm font-semibold flex items-center shadow">
+                <span>💬 Contact Advisor</span>
+            </a>
+            <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-semibold shadow">Logout</button>
+        </div>
+    </nav>
 
-    <div class="container">
-        <h2 id="welcomeMessage">Welcome, Investor</h2>
-        
-        <div class="info-grid">
-            <div class="info-box">
-                <span>PAN Number</span>
-                <strong id="displayPan">-</strong>
+    <div class="max-w-6xl mx-auto p-6">
+        <!-- Welcome / Status -->
+        <div class="mb-6 flex justify-between items-center">
+            <h2 id="welcomeText" class="text-2xl font-bold text-gray-800">Loading your portfolio...</h2>
+            <span id="userPanBadge" class="bg-blue-100 text-blue-800 px-3 py-1 rounded font-mono font-semibold text-sm"></span>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow border-l-4 border-blue-600">
+                <p class="text-gray-500 text-sm font-semibold">Total Investment</p>
+                <h3 id="totalInvested" class="text-3xl font-bold text-gray-800 mt-2">₹0</h3>
             </div>
-            <div class="info-box">
-                <span>Folio Number</span>
-                <strong id="displayFolio">-</strong>
+            <div class="bg-white p-6 rounded-xl shadow border-l-4 border-green-600">
+                <p class="text-gray-500 text-sm font-semibold">Current Value</p>
+                <h3 id="currentVal" class="text-3xl font-bold text-gray-800 mt-2">₹0</h3>
             </div>
-            <div class="info-box" style="grid-column: span 2;">
-                <span>Mutual Fund Scheme Name</span>
-                <strong id="displayScheme">-</strong>
+            <div class="bg-white p-6 rounded-xl shadow border-l-4 border-purple-600">
+                <p class="text-gray-500 text-sm font-semibold">Overall Profit / Loss</p>
+                <div class="flex items-baseline space-x-2 mt-2">
+                    <h3 id="totalProfit" class="text-3xl font-bold text-gray-800">₹0</h3>
+                    <span id="profitPercentBadge" class="text-sm font-bold px-2 py-0.5 rounded hidden">0%</span>
+                </div>
             </div>
-            <div class="info-box">
-                <span>Total Units</span>
-                <strong id="displayUnits">-</strong>
-            </div>
-            <div class="info-box">
-                <span>Purchase Value (Invested)</span>
-                <strong>₹ <span id="displayInvestment">0</span></strong>
-            </div>
-            <div class="info-box">
-                <span>Current Value</span>
-                <strong>₹ <span id="displayCurrentValue">0</span></strong>
-            </div>
-            <div class="info-box" style="border-left: 5px solid #ff9900;">
-                <span>Total Profit / Loss</span>
-                <strong style="font-size: 24px;">₹ <span id="displayProfitLoss">0</span></strong>
+        </div>
+
+        <!-- Mutual Funds Table -->
+        <div class="bg-white rounded-xl shadow overflow-hidden">
+            <div class="p-4 border-b bg-gray-50 font-bold text-gray-700">My Mutual Funds</div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 text-sm border-b">
+                            <th class="p-4">Scheme Name</th>
+                            <th class="p-4">Folio Number</th>
+                            <th class="p-4">Units</th>
+                            <th class="p-4">Current NAV</th>
+                            <th class="p-4">Invested (₹)</th>
+                            <th class="p-4">Current Value (₹)</th>
+                            <th class="p-4">Returns</th>
+                        </tr>
+                    </thead>
+                    <tbody id="portfolioTableBody" class="text-gray-700 text-sm">
+                        <tr>
+                            <td colspan="7" class="p-6 text-center text-gray-400">Fetching your investments...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <script>
-        window.addEventListener("DOMContentLoaded", () => {
-            // 1. Check if user is logged in (Agar Folio nahi mila, toh wapas Login page par bhej do)
-            const folio = localStorage.getItem("ClientFolio");
-            if (!folio) {
-                window.location.href = "index.html"; 
+        const SUPABASE_URL = 'https://rlllspfhssonpfbqhkbu.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UO0if8aY29MU98v7EOSMzg_QJSK4JZL';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function loadDashboard() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            
+            if (!session) {
+                window.location.href = 'login-test.html';
                 return;
             }
 
-            // 2. Get all data from LocalStorage (Jo humne login page se save kiya tha)
-            const name = localStorage.getItem("ClientName") || "Investor";
-            const pan = localStorage.getItem("ClientPan") || "-";
-            const scheme = localStorage.getItem("ClientScheme") || "-";
-            const units = localStorage.getItem("ClientUnits") || "0";
-            const investment = localStorage.getItem("ClientInvestedAmount") || "0";
-            const currentValue = localStorage.getItem("ClientCurrentValue") || "0";
-            const profitLoss = localStorage.getItem("ClientProfitLoss") || "0";
+            const email = session.user.email;
+            const pan = email.split('@')[0].toUpperCase();
 
-            // Indian Rupee Format function (eg: 150000 ko 1,50,000 banane ke liye)
-            const formatRs = (num) => new Intl.NumberFormat('en-IN').format(Number(num));
+            document.getElementById('userPanBadge').innerText = `PAN: ${pan}`;
 
-            // 3. HTML IDs mein Data dalna
-            document.getElementById("welcomeMessage").innerText = "Welcome, " + name;
-            document.getElementById("displayPan").innerText = pan;
-            document.getElementById("displayFolio").innerText = folio;
-            document.getElementById("displayScheme").innerText = scheme;
-            document.getElementById("displayUnits").innerText = units;
-            
-            document.getElementById("displayInvestment").innerText = formatRs(investment);
-            document.getElementById("displayCurrentValue").innerText = formatRs(currentValue);
-            
-            // 4. Profit / Loss ko set karna aur Color change karna
-            const plElement = document.getElementById("displayProfitLoss");
-            plElement.innerText = formatRs(profitLoss);
-            
-            if (Number(profitLoss) >= 0) {
-                plElement.classList.add("profit-text"); // Plus mein hai toh Hara (Green)
-            } else {
-                plElement.classList.add("loss-text");   // Minus mein hai toh Laal (Red)
+            const { data: portfolios, error: dbError } = await supabaseClient
+                .from('portfolio_data')
+                .select('*')
+                .eq('user_id_pan', pan);
+
+            if (dbError) {
+                console.error("DB Fetch Error:", dbError);
+                document.getElementById('welcomeText').innerText = "Error loading portfolio data.";
+                return;
             }
 
-            // 5. Logout Button Logic (Data clear karke wapas login screen par bhejna)
-            document.getElementById("logoutBtn").addEventListener("click", () => {
-                localStorage.clear();
-                window.location.href = "index.html";
+            if (!portfolios || portfolios.length === 0) {
+                document.getElementById('welcomeText').innerText = "Welcome! No investments found for this account.";
+                document.getElementById('portfolioTableBody').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">No folio records found in database.</td></tr>`;
+                return;
+            }
+
+            let totalInv = 0;
+            let totalCur = 0;
+            let tableHTML = '';
+            let clientName = portfolios[0].client_name || 'Valued Client';
+
+            document.getElementById('welcomeText').innerText = `Welcome, ${clientName}`;
+
+            portfolios.forEach(item => {
+                let inv = Number(item.invested_amount) || 0;
+                let cur = Number(item.current_value) || 0;
+                let units = Number(item.units) || 0;
+                let nav = Number(item.nav) || 0;
+
+                totalInv += inv;
+                totalCur += cur;
+
+                // Har scheme ka return aur % nikalna
+                let itemProfit = cur - inv;
+                let itemPercent = inv > 0 ? ((itemProfit / inv) * 100).toFixed(2) : "0.00";
+                let sign = itemProfit >= 0 ? '+' : '';
+                let colorClass = itemProfit >= 0 ? 'text-green-600' : 'text-red-600';
+
+                tableHTML += `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-4 font-medium text-gray-800">${item.scheme_name || 'N/A'}</td>
+                        <td class="p-4 text-gray-500">${item.folio_number || 'N/A'}</td>
+                        <td class="p-4 text-gray-600">${units > 0 ? units.toFixed(3) : '-'}</td>
+                        <td class="p-4 text-gray-600">${nav > 0 ? '₹' + nav.toFixed(2) : '-'}</td>
+                        <td class="p-4 font-medium">₹${inv.toLocaleString('en-IN')}</td>
+                        <td class="p-4 font-bold text-gray-800">₹${cur.toLocaleString('en-IN')}</td>
+                        <td class="p-4 font-semibold ${colorClass}">
+                            ${sign}₹${itemProfit.toLocaleString('en-IN')} (${sign}${itemPercent}%)
+                        </td>
+                    </tr>
+                `;
             });
+
+            let profit = totalCur - totalInv;
+            let totalPercent = totalInv > 0 ? ((profit / totalInv) * 100).toFixed(2) : "0.00";
+            let totalSign = profit >= 0 ? '+' : '';
+
+            // Update UI Cards
+            document.getElementById('totalInvested').innerText = `₹${totalInv.toLocaleString('en-IN')}`;
+            document.getElementById('currentVal').innerText = `₹${totalCur.toLocaleString('en-IN')}`;
+            
+            const profitElem = document.getElementById('totalProfit');
+            profitElem.innerText = `${totalSign}₹${profit.toLocaleString('en-IN')}`;
+            profitElem.className = `text-3xl font-bold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`;
+
+            // Update Percentage Badge on Card
+            const percentBadge = document.getElementById('profitPercentBadge');
+            percentBadge.innerText = `(${totalSign}${totalPercent}%)`;
+            percentBadge.className = `text-sm font-bold px-2 py-1 rounded ${profit >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+
+            // Update Table
+            document.getElementById('portfolioTableBody').innerHTML = tableHTML;
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'login-test.html';
         });
+
+        loadDashboard();
     </script>
 </body>
 </html>

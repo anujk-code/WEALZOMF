@@ -3,226 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WEALZOMF - Admin Panel</title>
-    <!-- SheetJS Library Excel file read karne ke liye -->
+    <title>Admin Panel - WealthVriddhi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
-        header { background-color: #003366; color: white; padding: 20px; text-align: center; }
-        .container { max-width: 650px; margin: 30px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
-        h2 { color: #003366; text-align: center; margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
-        input { width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        .save-btn { background-color: #28a745; color: white; border: none; padding: 12px; font-size: 16px; width: 100%; cursor: pointer; border-radius: 5px; font-weight: bold; margin-top: 10px; }
-        .save-btn:hover { background-color: #218838; }
-        .excel-box { background: #eef2f7; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 2px dashed #003366; }
-        #message { text-align: center; margin-top: 15px; font-weight: bold; font-size: 16px; }
-        .back-link { display: block; text-align: center; margin-top: 20px; color: #003366; text-decoration: none; font-weight: bold; }
-        hr { margin: 25px 0; border: 0; border-top: 1px solid #ddd; }
-    </style>
 </head>
-<body>
+<body class="bg-gray-50 p-8 font-sans text-gray-800">
 
-    <header>
-        <h1>WEALZOMF Financial Services</h1>
-        <p>Admin Management Panel - Bulk & Manual Entry</p>
-    </header>
-
-    <div class="container">
+    <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md border border-gray-200">
         
-        <!-- 📁 Bulk Upload Section (Excel / CSV) -->
-        <div class="excel-box">
-            <h3>📁 Bulk Upload via Excel (.xlsx / .csv)</h3>
-            <p style="font-size: 14px; color: #555;">Excel columns format: <br><b>name, pan, folio, scheme, units, investment, currentValue, profitLoss</b></p>
-            <input type="file" id="excelFile" accept=".xlsx, .csv" style="margin-top: 10px;">
-            <button class="save-btn" id="uploadExcelBtn" style="background-color: #003366; margin-top: 10px;">Upload & Auto-Save All to Database</button>
+        <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <h1 class="text-2xl font-bold text-blue-700">Admin Dashboard - Data Sync</h1>
+            <div id="connectionStatus" class="px-4 py-2 rounded-full font-bold text-sm bg-green-100 text-green-700">
+                🟢 Script Ready
+            </div>
         </div>
 
-        <hr>
-
-        <h2>Or Add Single Client Manually</h2>
-        
-        <div class="form-group">
-            <label>Investor Name:</label>
-            <input type="text" id="clientName" placeholder="Enter investor name">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="p-4 border rounded-lg bg-blue-50">
+                <label class="block font-bold mb-2 text-blue-800">1. Upload WBR2 (Transactions & Clients)</label>
+                <input type="file" id="wbr2File" accept=".csv, .xlsx, .xls" class="border p-2 rounded w-full bg-white">
+                <p class="text-xs text-gray-500 mt-2">Isse ID/Password banenge aur Invested Amount niklega.</p>
+            </div>
+            
+            <div class="p-4 border rounded-lg bg-green-50">
+                <label class="block font-bold mb-2 text-green-800">2. Upload WBR22 (Current Valuation)</label>
+                <input type="file" id="wbr22File" accept=".csv, .xlsx, .xls" class="border p-2 rounded w-full bg-white">
+                <p class="text-xs text-gray-500 mt-2">Isse Current Value (closing_assets) table mein jayega.</p>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label>PAN Number:</label>
-            <input type="text" id="clientPan" placeholder="Enter PAN number (e.g. ABCDE1234F)" style="text-transform: uppercase;">
+        <button id="processBtn" type="button" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-6 rounded shadow cursor-pointer">
+            Auto-Create Accounts & Sync Portfolio Data
+        </button>
+
+        <div id="logArea" class="mt-6 p-4 bg-gray-900 rounded text-sm h-72 overflow-y-auto">
+            <strong class="text-white">Processing Log:</strong><br>
+            <div id="logText" class="text-gray-300 mt-2">>> System initialized. Dono files select karke button dabaiye...</div>
         </div>
-
-        <div class="form-group">
-            <label>Folio Number:</label>
-            <input type="text" id="clientFolio" placeholder="Enter Folio number">
-        </div>
-
-        <div class="form-group">
-            <label>Scheme Name:</label>
-            <input type="text" id="clientScheme" placeholder="Enter Scheme name">
-        </div>
-
-        <div class="form-group">
-            <label>Total Units:</label>
-            <input type="number" step="any" id="clientUnits" placeholder="Enter Total Units">
-        </div>
-
-        <div class="form-group">
-            <label>Purchase Value (₹):</label>
-            <input type="number" id="clientInvestment" placeholder="Enter Purchase Value">
-        </div>
-
-        <div class="form-group">
-            <label>Current Value (₹):</label>
-            <input type="number" id="clientCurrentValue" placeholder="Enter Current Value">
-        </div>
-
-        <div class="form-group">
-            <label>Profit / Loss (₹):</label>
-            <input type="number" id="clientProfitLoss" placeholder="Enter profit (+ve) or loss (-ve)">
-        </div>
-
-        <button class="save-btn" id="saveClientBtn">Auto-Save Client to Database</button>
-        <p id="message"></p>
-
-        <a href="index.html" class="back-link">&larr; Back to Login Page</a>
     </div>
 
-    <!-- Firebase & Excel Auto-Save Scripts -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBMcDGkSVzbM4HYZyzPl_yfG8EBeDgh-UQ",
-            authDomain: "wealzomf-a1c10.firebaseapp.com",
-            projectId: "wealzomf-a1c10",
-            storageBucket: "wealzomf-a1c10.firebasestorage.app",
-            messagingSenderId: "361957885601",
-            appId: "1:361957885601:web:e933ec16b708cd94d812e0"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const messageEl = document.getElementById("message");
-
-        // 1. Manual Entry Auto-Save Logic
-        document.getElementById("saveClientBtn").addEventListener("click", async () => {
-            const name = document.getElementById("clientName").value.trim();
-            const pan = document.getElementById("clientPan").value.trim().toUpperCase();
-            const folio = document.getElementById("clientFolio").value.trim();
-            const scheme = document.getElementById("clientScheme").value.trim();
-            const units = document.getElementById("clientUnits").value.trim();
-            const investment = document.getElementById("clientInvestment").value.trim();
-            const currentValue = document.getElementById("clientCurrentValue").value.trim();
-            const profitLoss = document.getElementById("clientProfitLoss").value.trim();
-
-            if (!name || !pan || !folio || !scheme || !units || !investment || !currentValue || !profitLoss) {
-                messageEl.innerText = "Please fill all the fields!";
-                messageEl.style.color = "orange";
-                return;
-            }
-
-            messageEl.innerText = "Auto-saving client data to database...";
-            messageEl.style.color = "blue";
-
-            try {
-                await addDoc(collection(db, "client"), {
-                    name: name,
-                    pan: pan,
-                    folio: folio,
-                    scheme: scheme,
-                    units: Number(units),
-                    investment: Number(investment),
-                    currentValue: Number(currentValue),
-                    profitLoss: Number(profitLoss),
-                    status: "Active"
-                });
-
-                messageEl.innerText = "Client data auto-saved successfully!";
-                messageEl.style.color = "green";
-
-                // Clear input fields
-                document.getElementById("clientName").value = "";
-                document.getElementById("clientPan").value = "";
-                document.getElementById("clientFolio").value = "";
-                document.getElementById("clientScheme").value = "";
-                document.getElementById("clientUnits").value = "";
-                document.getElementById("clientInvestment").value = "";
-                document.getElementById("clientCurrentValue").value = "";
-                document.getElementById("clientProfitLoss").value = "";
-
-            } catch (error) {
-                messageEl.innerText = "Error: " + error.message;
-                messageEl.style.color = "red";
-            }
+    <script>
+        const SUPABASE_URL = 'https://rlllspfhssonpfbqhkbu.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UO0if8aY29MU98v7EOSMzg_QJSK4JZL';
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: { autoRefreshToken: false, persistSession: false }
         });
 
-        // 2. Excel Bulk Upload & Auto-Save Logic
-        document.getElementById("uploadExcelBtn").addEventListener("click", () => {
-            const fileInput = document.getElementById("excelFile");
-            if (fileInput.files.length === 0) {
-                messageEl.innerText = "Please select an Excel or CSV file first!";
-                messageEl.style.color = "orange";
+        const statusBadge = document.getElementById('connectionStatus');
+
+        function logStatus(msg, isError = false) {
+            const logBox = document.getElementById('logArea');
+            const logText = document.getElementById('logText');
+            const color = isError ? 'text-red-400' : 'text-green-400';
+            logText.innerHTML += `<div class="${color} mt-1">>> ${msg}</div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function readExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+                        resolve(jsonData);
+                    } catch (err) { reject(err); }
+                };
+                reader.onerror = (err) => reject(err);
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function findColumnValue(row, possibleNames) {
+            const keys = Object.keys(row);
+            for (let key of keys) {
+                const cleanKey = key.trim().toUpperCase();
+                if (possibleNames.includes(cleanKey)) {
+                    return String(row[key]).trim();
+                }
+            }
+            return "";
+        }
+
+        document.getElementById('processBtn').addEventListener('click', async () => {
+            const wbr2Input = document.getElementById('wbr2File');
+            const wbr22Input = document.getElementById('wbr22File');
+            
+            if (!wbr2Input.files.length) {
+                alert("Bhai, pehle 1st box mein WBR2 file select karo!");
                 return;
             }
 
-            const file = fileInput.files[0];
-            const reader = new FileReader();
+            statusBadge.innerText = "🔄 Processing...";
+            statusBadge.className = "px-4 py-2 rounded-full font-bold text-sm bg-blue-100 text-blue-700";
 
-            reader.onload = async (e) => {
-                try {
-                    messageEl.innerText = "Processing and auto-saving Excel data...";
-                    messageEl.style.color = "blue";
+            try {
+                // 1. WBR2 Processing (Accounts Creation + Folio Mapping)
+                logStatus('WBR2 file read ho rahi hai (Accounts + Invested Amount)...');
+                const wbr2Data = await readExcelFile(wbr2Input.files[0]);
+                let processedPANs = [];
+                let createdCount = 0;
 
-                    // Excel file ko read karna
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    
-                    const excelData = XLSX.utils.sheet_to_json(worksheet);
+                // Folio ke hisab se PAN aur Invested Amount store karne ke liye object
+                let folioMap = {};
 
-                    let savedCount = 0;
-                    
-                    // NAYA LOOP: Excel ke columns ko Database fields se map karna
-                    for (let i = 0; i < excelData.length; i++) {
-                        let row = excelData[i];
-                        
-                        const clientData = {
-                            // Excel wale headers exact match karne chahiye (space aur brackets ke sath)
-                            name: row["Investor Name"] ? String(row["Investor Name"]).trim() : "",
-                            pan: row["PAN Number"] ? String(row["PAN Number"]).trim().toUpperCase() : "",
-                            folio: row["Folio Number"] ? String(row["Folio Number"]).trim() : "",
-                            scheme: row["Scheme Name"] ? String(row["Scheme Name"]).trim() : "-",
-                            units: row["Total Units"] ? String(row["Total Units"]).trim() : "0",
-                            
-                            // Symbols (₹, comma, plus) hatana taaki sirf numbers save hon
-                            investment: row["Purchase Value (₹)"] ? String(row["Purchase Value (₹)"]).replace(/[₹, ]/g, "") : "0",
-                            currentValue: row["Current Value (₹)"] ? String(row["Current Value (₹)"]).replace(/[₹, ]/g, "") : "0",
-                            profitLoss: row["Profit / Loss (₹)"] ? String(row["Profit / Loss (₹)"]).replace(/[₹, +]/g, "") : "0"
-                        };
+                for (let row of wbr2Data) {
+                    let pan = findColumnValue(row, ['PAN', 'PAN_NO', 'PAN NO', 'PAN1', 'INV_PAN']).toUpperCase();
+                    let name = findColumnValue(row, ['INV_NAME', 'INVNAME', 'INVESTOR NAME', 'INVESTOR_NAME', 'NAME', 'CLIENT_NAME']);
+                    let folio = findColumnValue(row, ['FOLIO_NO', 'FOLIO', 'FOLIO NUMBER']);
+                    let scheme = findColumnValue(row, ['SCHEME', 'SCHEME_NAME', 'SCHEME NAME']);
+                    let amount = parseFloat(findColumnValue(row, ['AMOUNT', 'INV_AMOUNT', 'COST'])) || 0;
+                    let trxnType = findColumnValue(row, ['TRXNTYPE', 'TRXN_TYPE']).toUpperCase();
+                    let trxnNature = findColumnValue(row, ['TRXN_NATURE', 'NATURE']).toUpperCase();
 
-                        // Agar PAN aur Folio dono hain tabhi database mein add karega
-                        if (clientData.pan && clientData.folio) {
-                            await addDoc(collection(db, "client"), clientData);
-                            savedCount++;
+                    // Folio Mapping: WBR2 se PAN aur Invested Amount jodna
+                    if (folio && pan) {
+                        if (!folioMap[folio]) {
+                            folioMap[folio] = {
+                                pan: pan,
+                                clientName: name,
+                                schemeName: scheme,
+                                investedAmount: 0
+                            };
+                        }
+                        // Agar Redemption (paisa nikala) hai toh minus karein, warna plus karein
+                        if (trxnType.startsWith('R') || trxnNature.includes('REDEMPTION') || trxnNature.includes('SWITCH OUT')) {
+                            folioMap[folio].investedAmount -= amount;
+                        } else {
+                            folioMap[folio].investedAmount += amount;
                         }
                     }
 
-                    messageEl.innerText = "Success! " + savedCount + " clients automatically saved to Database.";
-                    messageEl.style.color = "green";
+                    // Account Creation Logic
+                    if (pan && name && pan.length === 10 && !processedPANs.includes(pan)) {
+                        processedPANs.push(pan);
 
-                } catch (error) {
-                    console.error("Excel Error:", error);
-                    messageEl.innerText = "Error: " + error.message;
-                    messageEl.style.color = "red";
+                        let email = `${pan.toLowerCase()}@wealthvriddhi.com`;
+                        let cleanName = name.replace(/^(MR\.|MRS\.|MS\.|SHRI|SMT)\s+/i, '').trim();
+                        let firstName = cleanName.split(/\s+/)[0].replace(/[^a-zA-Z]/g, '');
+                        let password = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() + '@123';
+
+                        const { error } = await supabaseClient.auth.signUp({
+                            email: email,
+                            password: password,
+                            options: { data: { full_name: name, pan: pan } }
+                        });
+
+                        if (!error) {
+                            createdCount++;
+                            logStatus(`Account Ready: ${pan} | Pass: ${password}`);
+                        }
+                        await new Promise(r => setTimeout(r, 100));
+                    }
                 }
-            };
-            
-            // Ye line reader.onload function ko chalati hai
-            reader.readAsArrayBuffer(file);
+                logStatus(`--- WBR2 Complete: ${processedPANs.length} unique PANs mile ---`);
+
+                // 2. WBR22 Processing (Syncing into 'portfolio_data' table)
+                if (wbr22Input.files.length > 0) {
+                    logStatus('WBR22 file se Current Value (closing_assets) read kiya ja raha hai...');
+                    const portfolioRows = await readExcelFile(wbr22Input.files[0]);
+                    logStatus(`Total portfolio rows mili: ${portfolioRows.length}. Database update ho raha hai...`);
+
+                    // Duplicate data se bachne ke liye purana portfolio_data clear karein
+                    await supabaseClient.from('portfolio_data').delete().neq('id', 0);
+
+                    let syncedCount = 0;
+                    for (let pRow of portfolioRows) {
+    let folio = findColumnValue(pRow, ['FOLIO', 'FOLIO_NO', 'FOLIO NUMBER']);
+    let clientName = findColumnValue(pRow, ['INV_NAME', 'INVESTOR NAME', 'NAME']);
+    let scheme = findColumnValue(pRow, ['SCHEME_NAME', 'SCHEME', 'SCHEME NAME']);
+    let curValue = parseFloat(findColumnValue(pRow, ['CLOSING_ASSETS', 'CURVAL', 'CURRENT_VALUE', 'VALUE'])) || 0;
+    
+    // NAYI LINES: Units aur NAV read karna
+    let units = parseFloat(findColumnValue(pRow, ['UNITS', 'BALANCE_UNITS'])) || 0;
+    let nav = parseFloat(findColumnValue(pRow, ['NAV', 'CUR_NAV', 'LATEST_NAV'])) || 0;
+
+    let mappedData = folioMap[folio] || {};
+    let pan = findColumnValue(pRow, ['PAN', 'PAN_NO', 'INV_PAN']) || mappedData.pan || "";
+    let invAmount = mappedData.investedAmount !== undefined ? mappedData.investedAmount : 0;
+
+    if (invAmount < 0 || curValue === 0) {
+        invAmount = curValue === 0 ? 0 : invAmount;
+    }
+
+    if (pan && (curValue > 0 || invAmount > 0)) {
+        const { error: insertError } = await supabaseClient
+            .from('portfolio_data')
+            .insert({
+                user_id_pan: pan.toUpperCase(),
+                client_name: clientName || mappedData.clientName,
+                folio_number: folio,
+                scheme_name: scheme || mappedData.schemeName,
+                invested_amount: Math.round(invAmount),
+                current_value: Math.round(curValue),
+                units: units, // Database mein units jayega
+                nav: nav      // Database mein NAV jayega
+            });
+
+        if (!insertError) {
+            syncedCount++;
+        } else {
+            logStatus(`Insert Error (${folio}): ${insertError.message}`, true);
+        }
+    }
+}
+                    logStatus(`✅ Portfolio Sync Complete! Total ${syncedCount} active folios 'portfolio_data' table mein save ho gaye hain.`);
+                } else {
+                    logStatus(`⚠️ WBR22 file select nahi ki gayi. Sirf accounts process huye.`, true);
+                }
+
+                statusBadge.innerText = "✅ Process Complete";
+                statusBadge.className = "px-4 py-2 rounded-full font-bold text-sm bg-green-100 text-green-700";
+
+            } catch (err) {
+                logStatus(`Critical Error: ${err.message}`, true);
+                statusBadge.innerText = "🔴 Error Occurred";
+                statusBadge.className = "px-4 py-2 rounded-full font-bold text-sm bg-red-100 text-red-700";
+            }
         });
     </script>
 </body>
